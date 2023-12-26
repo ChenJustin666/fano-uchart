@@ -25,7 +25,7 @@ postgresql:
   image:
     tag: '13.3.0'
 mysql:
-  enabled: false
+  enabled: true
   image:
     tag: 8.0.27-debian-10-r78
 nats:
