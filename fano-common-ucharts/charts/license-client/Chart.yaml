@@ -1,0 +1,6 @@
+apiVersion: v2
+appVersion: 0.0.0-master
+description: A Helm chart for Kubernetes
+name: license-client
+type: application
+version: 0.0.0-master

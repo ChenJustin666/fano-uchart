@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "license-client.fullname" . }}
+  labels:
+    {{- include "license-client.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "license-client.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "license-client.selectorLabels" . | nindent 8}}
+    spec:
+{{- include "common.images.pullSecrets" (dict "images" (list .Values.image) "global" .Values.global) | indent 6 }}
+      {{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      initContainers:
+      containers:
+        - args:
+            - start
+            - --env=production
+            - --port={{ .Values.port | default 8080 }}
+            {{- if .Values.tls.enabled }}
+            - --ca-cert=/ssl/ca.crt
+            - --server-cert=/ssl/tls.crt
+            - --server-key=/ssl/tls.key
+            {{- end }}
+            - --database-type={{ .Values.parameter.db.type }}
+            - --database-uri={{ include "license-client.db-url" . }}
+            - --database-username=$(LICENSE_CLIENT_RDBMS_USERNAME)
+            - --database-password=$(LICENSE_CLIENT_RDBMS_PASSWORD)
+            {{- if .Values.parameter.db.tls.enabled }}
+            - --database-ca-cert=/db/ssl/ca.crt
+            {{- end }}
+            - --database-table-name-prefix={{ .Values.parameter.databaseTableNamePrefix }}
+            - --reserved-quota-timeout-cron={{ .Values.parameter.reservedQuotaTimeoutCron }}
+            - --reserved-quota-timeout={{ .Values.parameter.reservedQuotaTimeout }}
+            {{- if .Values.parameter.runDatabaseMigration }}
+            - --run-database-migration=1
+            {{- end }}
+            {{- if .Values.parameter.db.encrypt }}
+            - --sql-server-encrypt=1
+            {{- end }}
+            - --sql-server-domain=$(LICENSE_CLIENT_RDBMS_DOMAIN)
+          env:
+            - name: NODE_TLS_REJECT_UNAUTHORIZED
+              value: '0'
+            - name: LICENSE_CLIENT_RDBMS_USERNAME
+              value: {{ .Values.parameter.db.rdbms_username }}
+            - name: LICENSE_CLIENT_RDBMS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .Values.parameter.db.auth.existingSecret }}"
+                  key: rdbms_password
+            - name: LICENSE_CLIENT_RDBMS_DOMAIN
+              value: {{ .Values.parameter.db.license_client_rdbms_domain }}
+          image: {{ include "common.images.image" (dict "imageRoot" .Values.image "global" .Values.global) }}
+          imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+          {{- if .Values.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          name: {{ .Release.Name }}-license-client
+          resources: 
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: tmp
+            - name: {{ .Release.Name }}-license-client-fano
+              mountPath: fano
+{{- include "license-client.tls-volume-mount" . | indent 12 }}
+{{- include "license-client.db.tls-volume-mount" . | indent 12 }}
+          readinessProbe:
+            httpGet:
+              path: /license-client/healthz
+              port: {{ .Values.port }}
+            initialDelaySeconds: 3
+            timeoutSeconds: 60
+          livenessProbe:
+            httpGet:
+              path: /license-client/healthz
+              port: {{ .Values.port }}
+            initialDelaySeconds: 6
+            timeoutSeconds: 60
+          ports:
+            - containerPort: {{ .Values.port }}
+      restartPolicy: Always
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: {{ .Release.Name }}-license-client-fano
+          emptyDir: {}
+{{- include "license-client.tls-volume" . | indent 8 }}
+{{- include "license-client.db.tls-volume" . | indent 8 }}
+      affinity:
+        podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.podAffinityPreset "context" $) | nindent 10 }}
+        podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.podAntiAffinityPreset "context" $) | nindent 10 }}
+        nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.nodeAffinityPreset.type "key" .Values.nodeAffinityPreset.key "values" .Values.nodeAffinityPreset.values "global" .Values.global ) | nindent 10 }}
+status: {}

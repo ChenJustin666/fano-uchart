@@ -1,0 +1,137 @@
+{{- $fullName := include "fanolabs.name" . -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "fanolabs.name" . }}
+  labels:
+    {{- include "fanolabs.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "fanolabs.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "fanolabs.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- include "common.imagePullSecrets" . | nindent 6 }}
+      volumes:
+      - name: {{ .Release.Name }}-libs
+        emptyDir: {}
+      - name: tmp
+        emptyDir: {}
+      - name: opt
+        emptyDir: {}
+      - name: logs
+        emptyDir: {}
+      - name: cache
+        emptyDir: {}
+      # - name: fano-ssl
+      #   secret:
+      #     secretName: fano-cert
+      - name: {{ .Values.localVolume.name}}
+        {{- if .Values.localVolume.enabled }}
+        hostPath:
+          path: {{ .Values.localVolume.hostPath }}
+        {{- else }}
+        emptyDir: {}
+        {{- end }}
+      serviceAccountName: {{ include "fanolabs.serviceAccountName" . }}
+      {{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: {{ template "fano-common.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+        {{- if .Values.command }}
+          command:
+            {{- range .Values.command }}
+            - {{ . | quote }}
+            {{- end }}
+        {{- end }}
+        {{- if .Values.commandArgs }}
+          args:
+          {{- range .Values.commandArgs }}
+            - {{ . | quote }}
+          {{- end }}
+        {{- end }}
+          env:
+        {{- range $key, $value := .Values.env }}
+            - name: "{{ $key }}"
+              value: "{{ $value }}"
+        {{- end }}
+        {{- range $key, $value := .Values.envSecret }}
+            - name: "{{ $key }}"
+              valueFrom:
+                secretKeyRef:
+                  name: "fano-common-secret"
+                  key: {{ $value }}
+        {{- end }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - name: {{ .Release.Name }}-libs
+              mountPath: /app/python
+            - name: tmp
+              mountPath: /tmp
+            - name: opt
+              mountPath: /opt
+            - name: logs
+              mountPath: /var/log
+            - name: cache
+              mountPath: /home/user/.cache
+
+            # - name: fano-ssl
+            #   mountPath: /code/fano-nlp-word-count/ssl
+            - name: {{ .Values.localVolume.name}}
+              mountPath: {{ .Values.localVolume.mountPath }}
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          lifecycle:
+            {{- toYaml .Values.lifecycle | nindent 12 }}
+          # livenessProbe:
+          #   httpGet:
+          #     path: /auth/realms/master
+          #     port: 8080
+          # readinessProbe:
+          #   httpGet:
+          #     path: /auth/realms/master
+          #     port: 8080
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.affinity }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- else }}
+      affinity:
+        podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.podAffinityPreset "context" $) | nindent 10 }}
+        podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.podAntiAffinityPreset "context" $) | nindent 10 }}
+        nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.nodeAffinityPreset.type "key" .Values.nodeAffinityPreset.key "values" .Values.nodeAffinityPreset.values "global" .Values.global ) | nindent 10 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

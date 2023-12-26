@@ -1,0 +1,162 @@
+# Default values for fano-ms-portal-datapanel.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: hub.fano.ai/fanolabs/fano_ms_portal_datapanel
+  tag: v21.12.01
+  #pullPolicy: IfNotPresent
+  pullPolicy: IfNotPresent
+imagePullSecrets:
+  - fano-secret-hk
+nameOverride: ""
+fullnameOverride: ""
+
+# command:
+#   - '/bin/sh'
+
+# commandArgs:
+#   - '-c'
+#   - '/app/fano-portal-ms-datapanel'
+  
+# commandjob:
+#   - '/bin/sh'
+
+# commandArgsjob:
+#   - '-c'
+#   - '/app/fano-portal-ms-datapanel job'
+env: {}
+mountPath: /app/files
+persistence:
+  enabled: false
+  existingClaim: fano-data
+  subPath: ms-datapanel
+
+localVolume:
+  enabled: false
+  hostPath: /opt/fano/data/chl-uat/files
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  enabled: true
+  fsGroup: 1001
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  enabled: true
+  runAsUser: 1001
+  runAsNonRoot: true
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: false
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/frontend-entry-points: http,https
+    #traefik.ingress.kubernetes.io/rule-type: PathPrefix
+    traefik.ingress.kubernetes.io/max-conn-amount: "10000"
+    traefik.ingress.kubernetes.io/max-conn-extractor-func: client.ip
+#    traefik.ingress.kubernetes.io/priority: "10"
+  hosts:
+    - host: tts-xxx.fano.ai
+      paths:
+      - /
+
+
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+# livenessProbe:
+#   tcpSocket:
+#     port: 8080
+#   initialDelaySeconds: 30
+#   timeoutSeconds: 10
+#   periodSeconds: 10
+#   successThreshold: 1
+#   failureThreshold: 3
+# readinessProbe:
+#   tcpSocket:
+#     port: 8080
+#   initialDelaySeconds: 30
+#   timeoutSeconds: 10
+#   periodSeconds: 10
+#   successThreshold: 1
+#   failureThreshold: 3
+
+affinity:
+  # nodeAffinity:
+  #   requiredDuringSchedulingIgnoredDuringExecution:
+  #     nodeSelectorTerms:
+  #       - matchExpressions:
+  #           - key: node
+  #             operator: In
+  #             values:
+  #               - test
+
+nodeSelector: {}
+
+tolerations: []
+## @param podAffinityPreset Pod affinity preset. Ignored if `affinity` is set. Allowed values: `soft` or `hard`
+## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+##
+podAffinityPreset: ""
+## @param podAntiAffinityPreset Pod anti-affinity preset. Ignored if `affinity` is set. Allowed values: `soft` or `hard`
+## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+##
+podAntiAffinityPreset: soft
+## Node affinity preset
+## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+##
+nodeAffinityPreset:
+  ## @param nodeAffinityPreset.type Node affinity preset type. Ignored if `affinity` is set. Allowed values: `soft` or `hard`
+  ##
+  type: ""
+  ## @param nodeAffinityPreset.key Node label key to match. Ignored if `affinity` is set.
+  ## E.g.
+  ## key: "kubernetes.io/e2e-az-name"
+  ##
+  key: ""
+  ## @param nodeAffinityPreset.values Node label values to match. Ignored if `affinity` is set.
+  ## E.g.
+  ## values:
+  ##   - e2e-az1
+  ##   - e2e-az2
+  ##
+  values: {}

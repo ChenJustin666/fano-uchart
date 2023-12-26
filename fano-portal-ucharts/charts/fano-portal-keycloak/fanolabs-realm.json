@@ -1,0 +1,2613 @@
+{
+    "id": "fanolabs",
+    "realm": "fanolabs",
+    "enabled": true,
+    "rememberMe": true,
+    "accessTokenLifespan": 3000,
+    "accessCodeLifespan": 10,
+    "accessCodeLifespanUserAction": 6000,
+    "ssoSessionIdleTimeoutRememberMe": 259200,
+    "ssoSessionMaxLifespanRememberMe": 259200,
+    "sslRequired": "external",
+    "registrationAllowed": false,
+    "privateKey": "MIICXAIBAAKBgQCrVrCuTtArbgaZzL1hvh0xtL5mc7o0NqPVnYXkLvgcwiC3BjLGw1tGEGoJaXDuSaRllobm53JBhjx33UNv+5z/UMG4kytBWxheNVKnL6GgqlNabMaFfPLPCF8kAgKnsi79NMo+n6KnSY8YeUmec/p2vjO2NjsSAVcWEQMVhJ31LwIDAQABAoGAfmO8gVhyBxdqlxmIuglbz8bcjQbhXJLR2EoS8ngTXmN1bo2L90M0mUKSdc7qF10LgETBzqL8jYlQIbt+e6TH8fcEpKCjUlyq0Mf/vVbfZSNaVycY13nTzo27iPyWQHK5NLuJzn1xvxxrUeXI6A2WFpGEBLbHjwpx5WQG9A+2scECQQDvdn9NE75HPTVPxBqsEd2z10TKkl9CZxu10Qby3iQQmWLEJ9LNmy3acvKrE3gMiYNWb6xHPKiIqOR1as7L24aTAkEAtyvQOlCvr5kAjVqrEKXalj0Tzewjweuxc0pskvArTI2Oo070h65GpoIKLc9jf+UA69cRtquwP93aZKtW06U8dQJAF2Y44ks/mK5+eyDqik3koCI08qaC8HYq2wVl7G2QkJ6sbAaILtcvD92ToOvyGyeE0flvmDZxMYlvaZnaQ0lcSQJBAKZU6umJi3/xeEbkJqMfeLclD27XGEFoPeNrmdx0q10Azp4NfJAY+Z8KRyQCR2BEG+oNitBOZ+YXF9KCpH3cdmECQHEigJhYg+ykOvr1aiZUMFT72HU0jnmQe2FVekuG+LJUt2Tm7GtMjTFoGpf0JwrVuZN39fOYAlo+nTixgeW7X8Y=",
+    "publicKey": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCrVrCuTtArbgaZzL1hvh0xtL5mc7o0NqPVnYXkLvgcwiC3BjLGw1tGEGoJaXDuSaRllobm53JBhjx33UNv+5z/UMG4kytBWxheNVKnL6GgqlNabMaFfPLPCF8kAgKnsi79NMo+n6KnSY8YeUmec/p2vjO2NjsSAVcWEQMVhJ31LwIDAQAB",
+    "requiredCredentials": [
+      "password"
+    ],
+    "passwordPolicy": "forceExpiredPasswordChange(365) and passwordHistory(5) and length(8) and notEmail(undefined) and notUsername(undefined) and specialChars(1) and lowerCase(2) and upperCase(2) and maxLength(64)",
+    "loginTheme": "fanolabs_23.04.08",
+    "adminTheme": "fanolabs_23.04.08",
+    "accountTheme": "keycloak",
+    "emailTheme": "keycloak",
+    "bruteForceProtected": true,
+    "failureFactor": 3,
+    "roles": {
+      "realm": [
+        {
+          "name": "default-roles-fanolabs",
+          "description": "${role_default-roles-fanolabs}",
+          "composite": true,
+          "composites": {
+            "client": {
+              "callinter": [
+                "dashboard-view",
+                "project-view",
+                "analysis-result-view",
+                "audio-viewer-view",
+                "workspace-view",
+                "intent-view",
+                "entity-view",
+                "pattern-view",
+                "speaker-role-view",
+                "biz-logic-view",
+                "classification-view",
+                "scorecard-view",
+                "graph-score-view",
+                "risk-item-view",
+                "dictionary-view",
+                "voiceprint-view",
+                "event-log-view",
+                "word-cloud-view",
+                "black-white-list-view",
+                "sentiment-view"
+              ],
+              "Portal": [
+                "end-user"
+              ],
+              "Intent": [
+                "model-view",
+                "intent-view",
+                "trainingset-view",
+                "trainingtask-view",
+                "cluster-view"
+              ],
+              "DataPanel": [
+                "dataset-view",
+                "dataview-view",
+                "dashboard-view"
+              ],
+              "Navinter": [
+                "calllog-view",
+                "voicebot-view"
+              ]
+            }
+          },
+          "clientRole": false,
+          "containerId": "fanolabs",
+          "attributes": {}
+        }
+      ],
+      "client": {
+        "Portal": [
+          {
+            "name": "end-user",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Portal",
+            "attributes": {}
+          },
+          {
+            "name": "tenant-admin",
+            "composite": true,
+            "composites": {
+              "client": {
+                "realm-management": [
+                  "view-clients",
+                  "manage-users",
+                  "query-clients"
+                ]
+              }
+            },
+            "clientRole": true,
+            "containerId": "Portal",
+            "attributes": {}
+          },
+          {
+            "name": "event-log-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Portal",
+            "attributes": {}
+          }
+        ],
+        "Intent": [
+          {
+            "name": "intent-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "intent-add",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "intent-export",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "intent-delete",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "intent-import",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "intent-edit",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "model-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "model-copy",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "model-edit",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "model-share",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "model-import",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "model-add",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "model-delete",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "trainingset-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "trainingset-add",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "trainingset-export",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "trainingset-delete",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "trainingset-edit",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "trainingset-import",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "trainingtask-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "trainingtask-add",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "trainingtask-download",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "trainingtask-copy",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "cluster-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "cluster-add",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "cluster-archive",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "cluster-cancel",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "cluster-delete",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "cluster-edit",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "regressiontest-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "ownership-transfer",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "built-in-entity-add",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "built-in-entity-delete",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "built-in-entity-edit",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "built-in-entity-export",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "built-in-entity-import",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "built-in-entity-publish",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          },
+          {
+            "name": "built-in-entity-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Intent",
+            "attributes": {}
+          }
+        ],
+        "DataPanel": [
+          {
+            "name": "datasource-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "datasource-add",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "datasource-delete",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "datasource-edit",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "datasource-export",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "datasource-import",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "dataset-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "dataset-add",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "dataset-delete",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "dataset-export",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "dataset-export-data",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "dataset-share",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "dataset-edit",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "dataset-import",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "dataset-copy",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "dataview-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "dataview-copy",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "dataview-import",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "dataview-edit",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "dataview-share",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "dataview-delete",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "dataview-add",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "dataview-export",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "dataview-export-data",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "dashboard-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "dashboard-delete",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "dashboard-edit",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "dashboard-import",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "dashboard-copy",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "dashboard-share",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "dashboard-add",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "dashboard-export",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "dashboard-export-data",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "storeprocedure-add",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "storeprocedure-delete",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "storeprocedure-edit",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "storeprocedure-export",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "storeprocedure-import",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "storeprocedure-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          },
+          {
+            "name": "ownership-transfer",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "DataPanel",
+            "attributes": {}
+          }
+        ],
+        "Navinter": [
+          {
+            "name": "calllog-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Navinter",
+            "attributes": {}
+          },
+          {
+            "name": "voicebot-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "Navinter",
+            "attributes": {}
+          }
+        ],
+        "callinter": [
+          {
+            "name": "analysis-result-search",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "analysis-result-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "analysis-result-export-table",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "analysis-result-export-transcription",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "audio-comment",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "audio-export",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "audio-player",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "audio-viewer-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "biz-logic-add",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "biz-logic-delete",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "biz-logic-edit",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "biz-logic-publish",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "biz-logic-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "black-white-list-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "blacklist-add",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "blacklist-delete",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "blacklist-export",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "blacklist-import",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "classification-add",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "classification-delete",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "classification-edit",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "classification-publish",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "classification-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "dashboard-add",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "dashboard-delete",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "dashboard-edit",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "dashboard-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "data-masking-add",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "data-masking-delete",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "data-masking-edit",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "data-masking-share",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "data-masking-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "dictionary-add",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "dictionary-delete",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "dictionary-edit",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "dictionary-share",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "dictionary-test",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "dictionary-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "entity-add",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "entity-delete",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "entity-edit",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "entity-export",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "entity-import",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "entity-publish",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "entity-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "event-log-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "graph-score-add",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "graph-score-delete",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "graph-score-edit",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "graph-score-publish",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "graph-score-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "intent-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "model-apply",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "pattern-add",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "pattern-delete",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "pattern-edit",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "pattern-export",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "pattern-import",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "pattern-publish",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "pattern-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "project-add",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "project-add-folder",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "project-delete",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "project-delete-data",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "project-delete-folder",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "project-reanalyze",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+          "name": "project-edit-reanalyze",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "callinter",
+          "attributes": {}
+          },
+          {
+            "name": "project-share",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "project-update",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "project-update-folder",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "project-upload-data",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "project-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "pro-search-and-save-query",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "risk-item-add",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "risk-item-delete",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "risk-item-edit",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "risk-item-publish",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "risk-item-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "scorecard-add",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "scorecard-delete",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "scorecard-edit",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "scorecard-publish",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "scorecard-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "segment-add",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "segment-delete",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "segment-edit",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "speaker-role-add",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "speaker-role-delete",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "speaker-role-edit",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "speaker-role-publish",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "speaker-role-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "transcription-export",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "voiceprint-add",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "voiceprint-delete",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "voiceprint-edit",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "voiceprint-share",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "voiceprint-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "whitelist-add",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "whitelist-delete",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "whitelist-export",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "whitelist-import",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "word-cloud-export",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "word-cloud-search",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "word-cloud-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "workspace-add",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "workspace-copy",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "workspace-delete",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "workspace-edit",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "workspace-export",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "workspace-import",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "workspace-share",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "workspace-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "sentiment-add",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "sentiment-delete",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "sentiment-edit",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "sentiment-publish",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "sentiment-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "workspace-publish-all",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "workflow-status",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "analysis-result-export-audio",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "data-masking-import",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "data-masking-export",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "association-view",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "association-add",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "association-edit",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "association-delete",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+            "name": "association-publish",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          },
+          {
+          "name": "project-folder-share",
+          "composite": false,
+          "clientRole": true,
+          "containerId": "callinter",
+          "attributes": {}
+        },
+          {
+            "name": "ownership-transfer",
+            "composite": false,
+            "clientRole": true,
+            "containerId": "callinter",
+            "attributes": {}
+          }
+        ]
+      }
+    },
+    "groups": [
+      {
+        "name": "Default-Group",
+        "path": "/Default-Group",
+        "attributes": {
+          "license_token": [
+            ""
+          ]
+        },
+        "realmRoles": [],
+        "clientRoles": {
+          "callinter": [
+            "dashboard-view",
+            "project-view",
+            "analysis-result-view",
+            "audio-viewer-view",
+            "workspace-view",
+            "intent-view",
+            "entity-view",
+            "pattern-view",
+            "speaker-role-view",
+            "biz-logic-view",
+            "classification-view",
+            "scorecard-view",
+            "graph-score-view",
+            "risk-item-view",
+            "dictionary-view",
+            "voiceprint-view",
+            "event-log-view",
+            "word-cloud-view",
+            "black-white-list-view",
+            "sentiment-view"
+          ],
+          "Portal": [
+            "end-user"
+          ],
+          "Intent": [
+            "model-view",
+            "intent-view",
+            "trainingset-view",
+            "trainingtask-view",
+            "cluster-view"
+          ],
+          "DataPanel": [
+            "dataset-view",
+            "dataview-view",
+            "dashboard-view"
+          ],
+          "Navinter": [
+            "calllog-view",
+            "voicebot-view"
+          ]
+        },
+        "subGroups": []
+      }
+    ],
+    "defaultRole": {
+      "name": "default-roles-fanolabs",
+      "description": "${role_default-roles-fanolabs}",
+      "composite": true,
+      "clientRole": false,
+      "containerId": "fanolabs"
+    },
+    "defaultGroups": [
+      "/Default-Group"
+    ],
+    "clients": [
+      {
+        "clientId": "TTS",
+        "name": "tts.title",
+        "description": "tts.description",
+        "enabled": false,
+        "adminUrl": "https://chluat.fano.ai/app/focotalk/",
+        "baseUrl": "https://chluat.fano.ai/app/focotalk/",
+        "webOrigins": [
+          "*"
+        ],
+        "redirectUris": [
+          "https://chluat.fano.ai/app/focotalk/*"
+        ],
+        "publicClient": true,
+        "protocolMappers": [
+          {
+            "name": "group_membership",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-group-membership-mapper",
+            "consentRequired": false,
+            "config": {
+              "full.path": "true",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "group_membership",
+              "userinfo.token.claim": "true"
+            }
+          },
+          {
+            "name": "license_token",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-hardcoded-claim-mapper",
+            "consentRequired": false,
+            "config": {
+              "claim.value": "",
+              "userinfo.token.claim": "true",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "license_token",
+              "jsonType.label": "String",
+              "access.tokenResponse.claim": "false"
+            }
+          }
+        ],
+        "defaultClientScopes": [
+          "email",
+          "profile",
+          "roles"
+        ],
+        "optionalClientScopes": [
+          "address",
+          "microprofile-jwt",
+          "offline_access",
+          "phone"
+        ]
+      },
+      {
+        "clientId": "STT",
+        "name": "stt.title",
+        "description": "stt.description",
+        "enabled": false,
+        "adminUrl": "https://chluat.fano.ai/app/demo/stt/",
+        "baseUrl": "https://chluat.fano.ai/app/demo/stt/",
+        "webOrigins": [
+          "*"
+        ],
+        "redirectUris": [
+          "https://chluat.fano.ai/app/demo/stt/*"
+        ],
+        "publicClient": true,
+        "protocolMappers": [
+          {
+            "name": "group_membership",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-group-membership-mapper",
+            "consentRequired": false,
+            "config": {
+              "full.path": "true",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "group_membership",
+              "userinfo.token.claim": "true"
+            }
+          },
+          {
+            "name": "license_token",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-hardcoded-claim-mapper",
+            "consentRequired": false,
+            "config": {
+              "claim.value": "",
+              "userinfo.token.claim": "true",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "license_token",
+              "jsonType.label": "String",
+              "access.tokenResponse.claim": "false"
+            }
+          }
+        ],
+        "defaultClientScopes": [
+          "email",
+          "profile"
+        ],
+        "optionalClientScopes": [
+          "address",
+          "microprofile-jwt",
+          "offline_access",
+          "phone"
+        ]
+      },
+      {
+        "clientId": "VoicePrint",
+        "name": "voiceprint.title",
+        "description": "voiceprint.description",
+        "enabled": false,
+        "adminUrl": "https://chluat.fano.ai/app/demo/voiceprint/",
+        "baseUrl": "https://chluat.fano.ai/app/demo/voiceprint/",
+        "webOrigins": [
+          "*"
+        ],
+        "redirectUris": [
+          "https://chluat.fano.ai/app/demo/voiceprint/*"
+        ],
+        "publicClient": true,
+        "protocolMappers": [
+          {
+            "name": "group_membership",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-group-membership-mapper",
+            "consentRequired": false,
+            "config": {
+              "full.path": "true",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "group_membership",
+              "userinfo.token.claim": "true"
+            }
+          },
+          {
+            "name": "license_token",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-hardcoded-claim-mapper",
+            "consentRequired": false,
+            "config": {
+              "claim.value": "",
+              "userinfo.token.claim": "true",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "license_token",
+              "jsonType.label": "String",
+              "access.tokenResponse.claim": "false"
+            }
+          }
+        ],
+        "defaultClientScopes": [
+          "email",
+          "profile",
+          "roles"
+        ],
+        "optionalClientScopes": [
+          "address",
+          "microprofile-jwt",
+          "offline_access",
+          "phone"
+        ]
+      },
+      {
+        "clientId": "Portal",
+        "enabled": true,
+        "adminUrl": "https://chluat.fano.ai/app/portal/",
+        "baseUrl": "https://chluat.fano.ai/app/portal/",
+        "webOrigins": [
+          "*"
+        ],
+        "redirectUris": [
+          "https://chluat.fano.ai/app/portal/*"
+        ],
+        "publicClient": true,
+        "directAccessGrantsEnabled": true,
+        "protocolMappers": [
+          {
+            "name": "group_membership",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-group-membership-mapper",
+            "consentRequired": false,
+            "config": {
+              "full.path": "true",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "group_membership",
+              "userinfo.token.claim": "true"
+            }
+          },
+          {
+            "name": "license_token",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-hardcoded-claim-mapper",
+            "consentRequired": false,
+            "config": {
+              "claim.value": "",
+              "userinfo.token.claim": "true",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "license_token",
+              "jsonType.label": "String",
+              "access.tokenResponse.claim": "false"
+            }
+          }
+        ],
+        "defaultClientScopes": [
+          "email",
+          "profile",
+          "roles"
+        ],
+        "optionalClientScopes": [
+          "address",
+          "microprofile-jwt",
+          "offline_access",
+          "phone"
+        ]
+      },
+      {
+        "clientId": "Intent",
+        "name": "intent.title",
+        "description": "intent.description",
+        "enabled": true,
+        "adminUrl": "https://chluat.fano.ai/app/nlp/",
+        "baseUrl": "https://chluat.fano.ai/app/nlp/",
+        "webOrigins": [
+          "*"
+        ],
+        "redirectUris": [
+          "https://chluat.fano.ai/app/nlp/*"
+        ],
+        "publicClient": true,
+        "protocolMappers": [
+          {
+            "name": "group_membership",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-group-membership-mapper",
+            "consentRequired": false,
+            "config": {
+              "full.path": "true",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "group_membership",
+              "userinfo.token.claim": "true"
+            }
+          },
+          {
+            "name": "license_token",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-hardcoded-claim-mapper",
+            "consentRequired": false,
+            "config": {
+              "claim.value": "",
+              "userinfo.token.claim": "true",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "license_token",
+              "jsonType.label": "String",
+              "access.tokenResponse.claim": "false"
+            }
+          }
+        ],
+        "defaultClientScopes": [
+          "email",
+          "profile"
+        ],
+        "optionalClientScopes": [
+          "address",
+          "microprofile-jwt",
+          "offline_access",
+          "phone"
+        ]
+      },
+      {
+        "clientId": "DataPanel",
+        "name": "datapanel.title",
+        "description": "datapanel.description",
+        "enabled": true,
+        "adminUrl": "https://chluat.fano.ai/app/datapanel/",
+        "baseUrl": "https://chluat.fano.ai/app/datapanel/",
+        "webOrigins": [
+          "*"
+        ],
+        "redirectUris": [
+          "https://chluat.fano.ai/app/datapanel/*"
+        ],
+        "publicClient": true,
+        "protocolMappers": [
+          {
+            "name": "group_membership",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-group-membership-mapper",
+            "consentRequired": false,
+            "config": {
+              "full.path": "true",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "group_membership",
+              "userinfo.token.claim": "true"
+            }
+          },
+          {
+            "name": "license_token",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-hardcoded-claim-mapper",
+            "consentRequired": false,
+            "config": {
+              "claim.value": "",
+              "userinfo.token.claim": "true",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "license_token",
+              "jsonType.label": "String",
+              "access.tokenResponse.claim": "false"
+            }
+          }
+        ],
+        "defaultClientScopes": [
+          "email",
+          "profile"
+        ],
+        "optionalClientScopes": [
+          "address",
+          "microprofile-jwt",
+          "offline_access",
+          "phone"
+        ]
+      },
+      {
+        "clientId": "Navinter",
+        "name": "navinter.title",
+        "description": "navinter.description",
+        "enabled": false,
+        "adminUrl": "https://chluat.fano.ai/app/navinter/",
+        "baseUrl": "https://chluat.fano.ai/app/navinter/",
+        "webOrigins": [
+          "*"
+        ],
+        "redirectUris": [
+          "https://chluat.fano.ai/app/navinter/*"
+        ],
+        "publicClient": true,
+        "protocolMappers": [
+          {
+            "name": "group_membership",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-group-membership-mapper",
+            "consentRequired": false,
+            "config": {
+              "full.path": "true",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "group_membership",
+              "userinfo.token.claim": "true"
+            }
+          },
+          {
+            "name": "license_token",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-hardcoded-claim-mapper",
+            "consentRequired": false,
+            "config": {
+              "claim.value": "",
+              "userinfo.token.claim": "true",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "license_token",
+              "jsonType.label": "String",
+              "access.tokenResponse.claim": "false"
+            }
+          }
+        ],
+        "defaultClientScopes": [
+          "email",
+          "profile"
+        ],
+        "optionalClientScopes": [
+          "address",
+          "microprofile-jwt",
+          "offline_access",
+          "phone"
+        ]
+      },
+      {
+        "clientId": "callinter",
+        "name": "callinter.title",
+        "description": "callinter.description",
+        "enabled": true,
+        "adminUrl": "https://chluat.fano.ai/app/callinter/",
+        "baseUrl": "https://chluat.fano.ai/app/callinter/",
+        "webOrigins": [
+          "*"
+        ],
+        "redirectUris": [
+          "https://chluat.fano.ai/app/callinter/*"
+        ],
+        "directAccessGrantsEnabled": true,
+        "publicClient": true,
+        "protocolMappers": [
+          {
+            "name": "callinter type",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-hardcoded-claim-mapper",
+            "consentRequired": false,
+            "config": {
+              "claim.value": "false",
+              "userinfo.token.claim": "true",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "isCallinterLite",
+              "jsonType.label": "boolean",
+              "access.tokenResponse.claim": "false"
+            }
+          },
+          {
+            "name": "license_token",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-hardcoded-claim-mapper",
+            "consentRequired": false,
+            "config": {
+              "claim.value": "",
+              "userinfo.token.claim": "true",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "license_token",
+              "jsonType.label": "String",
+              "access.tokenResponse.claim": "false"
+            }
+          },
+          {
+            "name": "speech_api_token",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usermodel-attribute-mapper",
+            "consentRequired": false,
+            "config": {
+              "userinfo.token.claim": "true",
+              "user.attribute": "speech_api_token",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "speech_api_token",
+              "jsonType.label": "String"
+            }
+          },
+          {
+            "name": "username",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usermodel-property-mapper",
+            "consentRequired": false,
+            "config": {
+              "userinfo.token.claim": "true",
+              "user.attribute": "username",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "username",
+              "jsonType.label": "String"
+            }
+          },
+          {
+            "name": "groups",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-group-membership-mapper",
+            "consentRequired": false,
+            "config": {
+              "full.path": "false",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "groups",
+              "userinfo.token.claim": "true"
+            }
+          }
+        ],
+        "defaultClientScopes": [
+          "email",
+          "profile"
+        ],
+        "optionalClientScopes": [
+          "address",
+          "microprofile-jwt",
+          "offline_access",
+          "phone"
+        ]
+      }
+    ],
+    "clientScopes": [
+      {
+        "name": "role_list",
+        "description": "SAML role list",
+        "protocol": "saml",
+        "attributes": {
+          "consent.screen.text": "${samlRoleListScopeConsentText}",
+          "display.on.consent.screen": "true"
+        },
+        "protocolMappers": [
+          {
+            "name": "role list",
+            "protocol": "saml",
+            "protocolMapper": "saml-role-list-mapper",
+            "consentRequired": false,
+            "config": {
+              "single": "false",
+              "attribute.nameformat": "Basic",
+              "attribute.name": "Role"
+            }
+          }
+        ]
+      },
+      {
+        "name": "acr",
+        "description": "OpenID Connect scope for add acr (authentication context class reference) to the token",
+        "protocol": "openid-connect",
+        "attributes": {
+          "include.in.token.scope": "false",
+          "display.on.consent.screen": "false"
+        },
+        "protocolMappers": [
+          {
+            "name": "acr loa level",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-acr-mapper",
+            "consentRequired": false,
+            "config": {
+              "id.token.claim": "true",
+              "access.token.claim": "true"
+            }
+          }
+        ]
+      },
+      {
+        "name": "web-origins",
+        "description": "OpenID Connect scope for add allowed web origins to the access token",
+        "protocol": "openid-connect",
+        "attributes": {
+          "include.in.token.scope": "false",
+          "display.on.consent.screen": "false",
+          "consent.screen.text": ""
+        },
+        "protocolMappers": [
+          {
+            "name": "allowed web origins",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-allowed-origins-mapper",
+            "consentRequired": false,
+            "config": {}
+          }
+        ]
+      },
+      {
+        "name": "address",
+        "description": "OpenID Connect built-in scope: address",
+        "protocol": "openid-connect",
+        "attributes": {
+          "include.in.token.scope": "true",
+          "display.on.consent.screen": "true",
+          "consent.screen.text": "${addressScopeConsentText}"
+        },
+        "protocolMappers": [
+          {
+            "name": "address",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-address-mapper",
+            "consentRequired": false,
+            "config": {
+              "user.attribute.formatted": "formatted",
+              "user.attribute.country": "country",
+              "user.attribute.postal_code": "postal_code",
+              "userinfo.token.claim": "true",
+              "user.attribute.street": "street",
+              "id.token.claim": "true",
+              "user.attribute.region": "region",
+              "access.token.claim": "true",
+              "user.attribute.locality": "locality"
+            }
+          }
+        ]
+      },
+      {
+        "name": "profile",
+        "description": "OpenID Connect built-in scope: profile",
+        "protocol": "openid-connect",
+        "attributes": {
+          "include.in.token.scope": "true",
+          "display.on.consent.screen": "true",
+          "consent.screen.text": "${profileScopeConsentText}"
+        },
+        "protocolMappers": [
+          {
+            "name": "full name",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-full-name-mapper",
+            "consentRequired": false,
+            "config": {
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "userinfo.token.claim": "true"
+            }
+          },
+          {
+            "name": "picture",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usermodel-attribute-mapper",
+            "consentRequired": false,
+            "config": {
+              "userinfo.token.claim": "true",
+              "user.attribute": "picture",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "picture",
+              "jsonType.label": "String"
+            }
+          },
+          {
+            "name": "gender",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usermodel-attribute-mapper",
+            "consentRequired": false,
+            "config": {
+              "userinfo.token.claim": "true",
+              "user.attribute": "gender",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "gender",
+              "jsonType.label": "String"
+            }
+          },
+          {
+            "name": "nickname",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usermodel-attribute-mapper",
+            "consentRequired": false,
+            "config": {
+              "userinfo.token.claim": "true",
+              "user.attribute": "nickname",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "nickname",
+              "jsonType.label": "String"
+            }
+          },
+          {
+            "name": "website",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usermodel-attribute-mapper",
+            "consentRequired": false,
+            "config": {
+              "userinfo.token.claim": "true",
+              "user.attribute": "website",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "website",
+              "jsonType.label": "String"
+            }
+          },
+          {
+            "name": "username",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usermodel-property-mapper",
+            "consentRequired": false,
+            "config": {
+              "userinfo.token.claim": "true",
+              "user.attribute": "username",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "preferred_username",
+              "jsonType.label": "String"
+            }
+          },
+          {
+            "name": "family name",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usermodel-property-mapper",
+            "consentRequired": false,
+            "config": {
+              "userinfo.token.claim": "true",
+              "user.attribute": "lastName",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "family_name",
+              "jsonType.label": "String"
+            }
+          },
+          {
+            "name": "middle name",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usermodel-attribute-mapper",
+            "consentRequired": false,
+            "config": {
+              "userinfo.token.claim": "true",
+              "user.attribute": "middleName",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "middle_name",
+              "jsonType.label": "String"
+            }
+          },
+          {
+            "name": "birthdate",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usermodel-attribute-mapper",
+            "consentRequired": false,
+            "config": {
+              "userinfo.token.claim": "true",
+              "user.attribute": "birthdate",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "birthdate",
+              "jsonType.label": "String"
+            }
+          },
+          {
+            "name": "given name",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usermodel-property-mapper",
+            "consentRequired": false,
+            "config": {
+              "userinfo.token.claim": "true",
+              "user.attribute": "firstName",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "given_name",
+              "jsonType.label": "String"
+            }
+          },
+          {
+            "name": "locale",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usermodel-attribute-mapper",
+            "consentRequired": false,
+            "config": {
+              "userinfo.token.claim": "true",
+              "user.attribute": "locale",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "locale",
+              "jsonType.label": "String"
+            }
+          },
+          {
+            "name": "updated at",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usermodel-attribute-mapper",
+            "consentRequired": false,
+            "config": {
+              "userinfo.token.claim": "true",
+              "user.attribute": "updatedAt",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "updated_at",
+              "jsonType.label": "String"
+            }
+          },
+          {
+            "name": "zoneinfo",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usermodel-attribute-mapper",
+            "consentRequired": false,
+            "config": {
+              "userinfo.token.claim": "true",
+              "user.attribute": "zoneinfo",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "zoneinfo",
+              "jsonType.label": "String"
+            }
+          },
+          {
+            "name": "profile",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usermodel-attribute-mapper",
+            "consentRequired": false,
+            "config": {
+              "userinfo.token.claim": "true",
+              "user.attribute": "profile",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "profile",
+              "jsonType.label": "String"
+            }
+          }
+        ]
+      },
+      {
+        "name": "microprofile-jwt",
+        "description": "Microprofile - JWT built-in scope",
+        "protocol": "openid-connect",
+        "attributes": {
+          "include.in.token.scope": "true",
+          "display.on.consent.screen": "false"
+        },
+        "protocolMappers": [
+          {
+            "name": "groups",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usermodel-realm-role-mapper",
+            "consentRequired": false,
+            "config": {
+              "multivalued": "true",
+              "user.attribute": "foo",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "groups",
+              "jsonType.label": "String"
+            }
+          },
+          {
+            "name": "upn",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usermodel-property-mapper",
+            "consentRequired": false,
+            "config": {
+              "userinfo.token.claim": "true",
+              "user.attribute": "username",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "upn",
+              "jsonType.label": "String"
+            }
+          }
+        ]
+      },
+      {
+        "name": "email",
+        "description": "OpenID Connect built-in scope: email",
+        "protocol": "openid-connect",
+        "attributes": {
+          "include.in.token.scope": "true",
+          "display.on.consent.screen": "true",
+          "consent.screen.text": "${emailScopeConsentText}"
+        },
+        "protocolMappers": [
+          {
+            "name": "email verified",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usermodel-property-mapper",
+            "consentRequired": false,
+            "config": {
+              "userinfo.token.claim": "false",
+              "user.attribute": "emailVerified",
+              "id.token.claim": "false",
+              "access.token.claim": "false",
+              "claim.name": "email_verified",
+              "jsonType.label": "boolean"
+            }
+          },
+          {
+            "name": "email",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usermodel-property-mapper",
+            "consentRequired": false,
+            "config": {
+              "userinfo.token.claim": "true",
+              "user.attribute": "email",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "email",
+              "jsonType.label": "String"
+            }
+          }
+        ]
+      },
+      {
+        "name": "phone",
+        "description": "OpenID Connect built-in scope: phone",
+        "protocol": "openid-connect",
+        "attributes": {
+          "include.in.token.scope": "true",
+          "display.on.consent.screen": "true",
+          "consent.screen.text": "${phoneScopeConsentText}"
+        },
+        "protocolMappers": [
+          {
+            "name": "phone number verified",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usermodel-attribute-mapper",
+            "consentRequired": false,
+            "config": {
+              "userinfo.token.claim": "true",
+              "user.attribute": "phoneNumberVerified",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "phone_number_verified",
+              "jsonType.label": "boolean"
+            }
+          },
+          {
+            "name": "phone number",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usermodel-attribute-mapper",
+            "consentRequired": false,
+            "config": {
+              "userinfo.token.claim": "true",
+              "user.attribute": "phoneNumber",
+              "id.token.claim": "true",
+              "access.token.claim": "true",
+              "claim.name": "phone_number",
+              "jsonType.label": "String"
+            }
+          }
+        ]
+      },
+      {
+        "name": "roles",
+        "description": "OpenID Connect scope for add user roles to the access token",
+        "protocol": "openid-connect",
+        "attributes": {
+          "include.in.token.scope": "false",
+          "display.on.consent.screen": "true",
+          "consent.screen.text": "${rolesScopeConsentText}"
+        },
+        "protocolMappers": [
+          {
+            "name": "realm roles",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usermodel-realm-role-mapper",
+            "consentRequired": false,
+            "config": {
+              "user.attribute": "foo",
+              "access.token.claim": "true",
+              "claim.name": "realm_access.roles",
+              "jsonType.label": "String",
+              "multivalued": "true"
+            }
+          },
+          {
+            "name": "client roles",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-usermodel-client-role-mapper",
+            "consentRequired": false,
+            "config": {
+              "multivalued": "true",
+              "user.attribute": "foo",
+              "access.token.claim": "true",
+              "claim.name": "resource_access.${client_id}.roles",
+              "jsonType.label": "String",
+              "usermodel.clientRoleMapping.clientId": "realm-management"
+            }
+          },
+          {
+            "name": "audience resolve",
+            "protocol": "openid-connect",
+            "protocolMapper": "oidc-audience-resolve-mapper",
+            "consentRequired": false,
+            "config": {}
+          }
+        ]
+      },
+      {
+        "name": "offline_access",
+        "description": "OpenID Connect built-in scope: offline_access",
+        "protocol": "openid-connect",
+        "attributes": {
+          "consent.screen.text": "${offlineAccessScopeConsentText}",
+          "display.on.consent.screen": "true"
+        }
+      }
+    ]
+  }

@@ -1,0 +1,1033 @@
+global:
+  serviceAccount: "default"
+  imageRegistry: 'hub.fano.ai'
+  imagePullSecrets:
+    - fano-secret-hk
+  existingClaim: 'chl-uat'
+  nodeAffinityPreset:
+    type: ""
+    key: "node"
+    values:
+      - chl-uat
+  hostAliases:
+    enabled: true
+    values:
+      - ip: "192.168.174.20"
+        hostnames:
+        - "chluat.fano.ai"
+############################################################################################################################
+##    service: fano-callinter-web                                                                                       ##
+############################################################################################################################
+fano-callinter-web:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: fanolabs/fano-app-callinter
+    pullPolicy: IfNotPresent
+  env:
+    # Server
+    NODE_ENV: "production"
+    APP_VERSION: ""
+    API_GATEWAY_URL: "https://chluat.fano.ai"
+    APP_CONFIG_ENDPOINT: "http://fano-callinter-crud:8080/callinter-crud/configs"
+  #envSecret:
+  localVolume:
+    enabled: true
+    extraVolumeMounts: []
+    extraConfigmapMounts:
+      - name: devconfig
+        mountPath: /app/custom.config.json
+        subPath: dev.config.json
+        configMap: appcallinterconfigs
+      - name: en
+        mountPath: /app/customI18n/en.json
+        subPath: prod.en.json
+        configMap: appcallinterconfigs
+      - name: zhhant
+        mountPath: /app/customI18n/zhHant.json
+        subPath: prod.zhhant.json
+        configMap: appcallinterconfigs
+      - name: zhhans
+        mountPath: /app/customI18n/zhHans.json
+        subPath: prod.zhhans.json
+        configMap: appcallinterconfigs
+  commandArgs:
+    - "-c"
+    - "/app/run.sh"
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  affinity: {}
+############################################################################################################################
+##    service: fano-callinter-analyze-worker                                                                           ##
+############################################################################################################################
+fano-callinter-analyze-worker:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: fanolabs/fano-ms-callinter-analyze-worker
+    pullPolicy: IfNotPresent
+  env:
+    NODE_TLS_REJECT_UNAUTHORIZED: "0"
+    NODE_OPTIONS: "--max-old-space-size=8192"
+    NODE_ENV: "production"
+    TZ: "Asia/Hong_Kong"
+    CALLINTER_ANALYZE_WORKER_TENANT_ID: "chl-uat"
+    # Server
+    CALLINTER_ANALYZE_WORKER_SERVER_PORT: "8080"
+    #CALLINTER_ANALYZE_WORKER_SERVER_SSL_CERT: "/code/fano_ms_callinter_analyze_worker/ssl/server-cert.pem"
+    #CALLINTER_ANALYZE_WORKER_SERVER_SSL_KEY: "/code/fano_ms_callinter_analyze_worker/ssl/server-key.pem"
+    CALLINTER_ANALYZE_WORKER_SERVER_REQUEST_TIMEOUT: "900000"
+    # Log
+    CALLINTER_ANALYZE_WORKER_LOG_LEVEL: "info"
+    CALLINTER_ANALYZE_WORKER_STACK_TRACE: "true"
+    # DB
+    CALLINTER_ANALYZE_WORKER_RDBMS_ENGINE: "mssql"
+    CALLINTER_ANALYZE_WORKER_RDBMS_HOST: "192.168.174.52"
+    CALLINTER_ANALYZE_WORKER_RDBMS_PORT: "1433"
+    CALLINTER_ANALYZE_WORKER_RDBMS_DB: "chluat"
+    CALLINTER_ANALYZE_WORKER_RDBMS_POOL_MIN: "0"
+    CALLINTER_ANALYZE_WORKER_RDBMS_POOL_MAX: "10"
+    CALLINTER_ANALYZE_WORKER_RDBMS_ENABLE_SSL: "false"
+    CALLINTER_ANALYZE_WORKER_RDBMS_CONNECTION_ENCRYPT: "false"
+    # Nats
+    CALLINTER_ANALYZE_WORKER_NATS_SERVER_URL: "fano-common-nats:4222"
+    CALLINTER_ANALYZE_WORKER_NATS_STREAM_NAME: "callinter"
+    CALLINTER_ANALYZE_WORKER_NATS_RETENTION_POLICY: "workqueue"
+    # File Storage
+    CALLINTER_ANALYZE_WORKER_MINIO_SERVER_HOST: "fano-common-oss"
+    CALLINTER_ANALYZE_WORKER_MINIO_SERVER_PORT: "9000"
+    CALLINTER_ANALYZE_WORKER_MINIO_USE_SSL: "false"
+    CALLINTER_ANALYZE_WORKER_MINIO_BUCKET_NAME: "chl-uat"
+    CALLINTER_ANALYZE_WORKER_MINIO_REGION: "ap-east-1"
+    CALLINTER_ANALYZE_WORKER_MINIO_URL_EXPIRY_TIME_IN_SEC: "604800" # 7 days(72*60*60*7)
+    CALLINTER_ANALYZE_WORKER_MINIO_EXTERNAL_HOST: "https://chluat.fano.ai"
+    CALLINTER_ANALYZE_WORKER_MINIO_ENABLE_CONTEXTUAL_PATH: "true"
+    CALLINTER_ANALYZE_WORKER_MINIO_USE_EXTERNAL_SSL: "true"
+    # Services
+    CALLINTER_ANALYZE_WORKER_SERVER_URL: "http://fano-callinter-analyze-worker:8080"
+    CALLINTER_ANALYZE_WORKER_CRUD_SERVER_URL: "http://fano-callinter-crud:8080"
+    CALLINTER_ANALYZE_WORKER_NLP_TASK_SERVER_URL: "http://fano-nlp-task:8080"
+    CALLINTER_ANALYZE_WORKER_INTENT_SERVER_URL: "http://fano-nlp-intent:8080"
+    CALLINTER_ANALYZE_WORKER_ENTITY_SERVER_URL: "http://fano-nlp-entity:8080"
+    CALLINTER_ANALYZE_WORKER_SPEECH_PATTERN_SERVER_URL: "http://fano-nlp-pattern-recognition:8080"
+    CALLINTER_ANALYZE_WORKER_WORD_COUNT_SERVER_URL: "http://fano-nlp-word-count:8080"
+    CALLINTER_ANALYZE_WORKER_QUALITY_CHECK_SERVER_URL: "http://fano-callinter-quality-check-worker:8080"
+    CALLINTER_ANALYZE_WORKER_SPEECH_ADAPTER_SERVER_URL: "http://fano-callinter-speech-adapter:8080"
+    CALLINTER_ANALYZE_WORKER_SPEECH_SERVER_URL: "http://fano-speech-gateway-service:3000"
+    CALLINTER_ANALYZE_WORKER_SPEECH_DEFAULT_PHRASE_REPLACEMENT_LANG_CODE: "yue"
+    CALLINTER_ANALYZE_WORKER_LANGUAGE_CODE_CONVERT_LIST: "zh-Hans:cmn;yue-Hant:yue;thai:th;yue-nar:yue-x-nar"
+    CALLINTER_ANALYZE_WORKER_SANITISING_SERVER_URL: "http://fano-callinter-sanitising:8080"
+    CALLINTER_ANALYZE_WORKER_RDBMS_USER: "chluatusr"
+    CALLINTER_ANALYZE_WORKER_MINIO_ACCESS_KEY: "admin"
+    CALLINTER_ANALYZE_WORKER_MINIO_SKIP_GET_BUCKET_REGION: "false"                              #Set true if using dell s3
+    CALLINTER_ANALYZE_WORKER_MINIO_IGNORE_CREATE_BUCKET_ERROR: "false"                          #Set true if no listAllMyBuckets or createBucket permission
+    CALLINTER_ANALYZE_WORKER_NATS_SERVER_ENABLE_SSL: "false"                                    #Set true if nats using TLS connection
+    CALLINTER_ANALYZE_WORKER_RDBMS_DOMAIN: ""                                                   #Set domain ip if MSSQL connects using Windows Authentication
+    CALLINTER_ANALYZE_WORKER_RDBMS_CONNECTION_TYPE: ""        #Set 'ntlm' if MSSQL connects using Windows Authentication
+  envSecret:
+    CALLINTER_ANALYZE_WORKER_RDBMS_PASSWORD: "rdbms_password"
+    CALLINTER_ANALYZE_WORKER_MINIO_SECRET_KEY: "oss_secretkey"
+  commandArgs:
+    - "-c"
+    - "/app/run.sh && /fano/fano-ms-callinter-analyze-worker"
+  resources:
+    limits:
+      cpu: 4000m
+      memory: 2048Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+############################################################################################################################
+##    service: fano-callinter-crud                                                                                     ##
+############################################################################################################################
+fano-callinter-crud:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: fanolabs/fano-ms-callinter-crud
+    pullPolicy: IfNotPresent
+  env:  # Server
+    NODE_TLS_REJECT_UNAUTHORIZED: "0"
+    NODE_OPTIONS: "--max-http-header-size=81920 --max-old-space-size=8192"
+    NODE_ENV: "production"
+    TZ: "Asia/Hong_Kong"
+    CALLINTER_CRUD_TENANT_ID: "chl-uat"
+    # Server
+    CALLINTER_CRUD_SERVER_PORT: "8080"
+    #CALLINTER_CRUD_SERVER_SSL_CERT: "/code/fano_ms_callinter_crud/ssl/server-cert.pem"
+    #CALLINTER_CRUD_SERVER_SSL_KEY: "/code/fano_ms_callinter_crud/ssl/server-key.pem"
+    CALLINTER_CRUD_SERVER_REQUEST_TIMEOUT: "900000"
+    # Log
+    CALLINTER_CRUD_LOG_LEVEL: "info"
+    CALLINTER_CRUD_LOG_STACK_TRACE: "true"
+    # Database
+    CALLINTER_CRUD_RDBMS_ENGINE: "mssql"
+    CALLINTER_CRUD_RDBMS_HOST: "192.168.174.52"
+    CALLINTER_CRUD_RDBMS_PORT: "1433"
+    CALLINTER_CRUD_RDBMS_DB: "chluat"
+    CALLINTER_CRUD_RDBMS_POOL_MIN: "10"
+    CALLINTER_CRUD_RDBMS_POOL_MAX: "200"
+    CALLINTER_CRUD_RDBMS_ENABLE_SSL: "false"
+    CALLINTER_CRUD_RDBMS_CONNECTION_ENCRYPT: "false"
+    CALLINTER_CRUD_RDBMS_CONNECTION_TYPE: ""        #Set 'ntlm' if MSSQL connects using Windows Authentication
+    # File Storage
+    CALLINTER_CRUD_MINIO_SERVER_HOST: "fano-common-oss"
+    CALLINTER_CRUD_MINIO_SERVER_PORT: "9000"
+    CALLINTER_CRUD_MINIO_EXTERNAL_HOST: "chluat.fano.ai"
+    CALLINTER_CRUD_MINIO_USE_EXTERNAL_SSL: "true"
+    CALLINTER_CRUD_MINIO_ENABLE_CONTEXTUAL_PATH: "true"
+    CALLINTER_CRUD_MINIO_USE_SSL: "false"
+    CALLINTER_CRUD_MINIO_BUCKET_NAME: "chl-uat"
+    CALLINTER_CRUD_MINIO_REGION: "ap-east-1"
+    CALLINTER_CRUD_MINIO_URL_EXPIRY_TIME_IN_SEC: "86400" # 24hours(24*60*60)
+    CALLINTER_CRUD_MINIO_URL_INTERNAL_EXPIRY_TIME_IN_SEC: "604800" # (7 days. , 24*60*60*7)
+    OSS_EXTERNAL_URL: chluat.fano.ai
+    # nats
+    CALLINTER_CRUD_NATS_SERVER_URL: "fano-common-nats:4222"
+    CALLINTER_CRUD_NATS_STREAM_NAME: "callinter"
+    CALLINTER_CRUD_NATS_RETENTION_POLICY: "workqueue"
+    # schedulers
+    CALLINTER_CRUD_SCHEDULER_ANALYSIS_ENABLE_REQUEUE: "true"
+    CALLINTER_CRUD_SCHEDULER_ANALYSIS_REQUEUE_INTERVAL_MINUTE: "5"
+    CALLINTER_CRUD_SCHEDULER_ANALYSIS_ENABLE_EXCEPTION_HANDLING: "true"
+    CALLINTER_CRUD_SCHEDULER_ANALYSIS_EXCEPTION_HANDLING_INTERVAL_HOUR: "1"
+    CALLINTER_CRUD_SCHEDULER_GENERAL_SETTING_ENABLE_REFRESH: "true"
+    CALLINTER_CRUD_SCHEDULER_GENERAL_SETTING_INTERVAL_MINUTE: "1"
+    # injectionRiskChecking
+    CALLINTER_CRUD_INJECTION_RISK_CHECKING_JS: "<script"
+    # auth
+    ## keycloak
+    CALLINTER_CRUD_AUTH_KEYCLOAK_SERVER_URL: "https://chluat.fano.ai/iam"
+    CALLINTER_CRUD_AUTH_KEYCLOAK_INTERNAL_SERVER_URL: "http://fano-portal-keycloak:8080/iam"
+    CALLINTER_CRUD_AUTH_KEYCLOAK_REALM: "fanolabs"
+    CALLINTER_CRUD_AUTH_KEYCLOAK_RESOURCE: "callinter"
+    # services
+    ## portal
+    CALLINTER_CRUD_PORTAL_SERVER_URL: "https://chluat.fano.ai/portal-crud"
+    CALLINTER_CRUD_PORTAL_FRONT_END_URL: "https://chluat.fano.ai/app/portal"
+    CALLINTER_CRUD_PORTAL_INTERNAL_SERVER_URL: "http://fano-portal-crud:8080/portal-crud"
+    ## intent
+    CALLINTER_CRUD_INTENT_SERVER_URL: "https://chluat.fano.ai/nlp-crud"
+    ## entity
+    CALLINTER_CRUD_ENTITY_SERVER_URL: "http://fano-nlp-entity:8080"
+    ## pattern
+    CALLINTER_CRUD_PATTERN_SERVER_URL: "http://fano-nlp-pattern-recognition:8080"
+    ## wordCount
+    CALLINTER_CRUD_WORD_COUNT_SERVER_URL: "http://fano-nlp-word-count:8080"
+    ## quality-check
+    CALLINTER_CRUD_QUALITY_CHECK_SERVER_URL: "http://fano-callinter-quality-check-worker:8080"
+    CALLINTER_CRUD_ANALYZE_WORKER_SERVER_URL: "http://fano-callinter-analyze-worker:8080"
+    ## datepanel
+    CALLINTER_CRUD_DATA_PANEL_SERVER_URL: "https://chluat.fano.ai/datapanel-crud"
+    ## Speech
+    CALLINTER_CRUD_SPEECH_SERVER_URL: "http://fano-speech-gateway-service:3000"
+    CALLINTER_CRUD_SPEECH_CALLINTER_LANGUAGE_CODE_CONVERT_LIST: "zh-Hans:cmn;yue-Hant:yue;thai:th;yue-nar:yue-x-nar"
+    ## license
+    CALLINTER_CRUD_LICENSE_SERVER_URL: "http://fano-common-license-client:8080"
+    ## proSearch
+    CALLINTER_CRUD_PRO_SEARCH_SERVER_URL: 'http://fano-prosearch-crud:8080'
+    ## sanitising
+    CALLINTER_CRUD_SANITISING_SERVER_URL: "http://fano-callinter-sanitising:8080"
+    CALLINTER_CRUD_SANITISE_TIMEOUT_MILLI_SEC: "120000"
+    ## adapter
+    CALLINTER_CRUD_SPEECH_ADDAPTER_SERVER_URL: "http://fano-callinter-speech-adapter:8080"
+    ## downloadWorker
+    CALLINTER_CRUD_DOWNLOAD_WORKER_SERVER_URL: "http://fano-callinter-download-worker:8080"
+    # modules
+    ## Audio
+    CALLINTER_CRUD_AUDIO_SUPPORTED_LANGUAGE_CODES: "yue-Hant,zh-Hans,en,yue-x-auto,yue-nar,yue-x-narauto,en-x-nar,cmn-x-nar,vi,th,fr"
+    CALLINTER_CRUD_AUDIO_DEFAULT_LANGUAGE_CODE: "yue-Hant"
+    CALLINTER_CRUD_AUDIO_DEFAULT_CHAT_LOG_LANGUAGE_CODE: "yue-x-auto"
+    CALLINTER_CRUD_UPLOAD_AUDIO_DEFAULT_DIARIZATION_VALUE: "true"
+    CALLINTER_CRUD_UPLOAD_AUDIO_IS_CONVERSION_ON: "true"
+    CALLINTER_CRUD_UPLOAD_AUDIO_CONVERSION_FORCE_CONVERT: "true"
+    CALLINTER_CRUD_UPLOAD_AUDIO_CONVERSION_DEFAULT_MEDIA_TYPE: "flac"
+    CALLINTER_CRUD_UPLOAD_AUDIO_CONVERSION_DEFAULT_MEDIA_SAMPLE_RATE: "16000"
+    CALLINTER_CRUD_UPLOAD_AUDIO_CONVERSION_USE_DEFAULT_MEDIA_SAMPLE_RATE: "true"
+    CALLINTER_CRUD_UPLOAD_AUDIO_CONVERSION_SILK_DECODER_PATH: "/fano/silk-v3-decoder/converter.sh"
+    ## Chat Log
+    CALLINTER_CRUD_UPLOAD_CHAT_LOG_FIELD_SESSION_ID: "Session ID"
+    CALLINTER_CRUD_UPLOAD_CHAT_LOG_FIELD_SPEAKER_ROLE: "Speaker"
+    CALLINTER_CRUD_UPLOAD_CHAT_LOG_FIELD_TEXT: "Text"
+    CALLINTER_CRUD_UPLOAD_CHAT_LOG_FIELD_CHAT_TIME: "Chat Time"
+    CALLINTER_CRUD_QUOTA_UNIT: "15" ## 1 quota = 15 sec
+    ## sanitising
+    CALLINTER_CRUD_SANITISING_IS_SANITISING_ON: "true"
+    # endpoints
+    CALLINTER_CRUD_ENDPOINTS_MAX_FILE_UPLOAD_NUMBER_LIMIT: "200"
+    CALLINTER_CRUD_ENDPOINTS_MAX_PAGINATION_LIMIT: "500"
+    ## syncer
+    CALLINTER_CRUD_SYNCER_ENABLED: "false"
+    ## workflow
+    CALLINTER_CRUD_WORKFLOW_GEN_SETTING_CATEGORY: "callinter"
+    CALLINTER_CRUD_WORKFLOW_GEN_SETTING_GROUP_NAME: "workflow"
+    CALLINTER_CRUD_WORKFLOW_GEN_SETTING_ITEM_KEY: "workflowStatusConfig"
+    CALLINTER_CRUD_WORKFLOW_GEN_SETTING_ITEM_TYPE: "File"
+    CALLINTER_CRUD_WORKFLOW_CACHE_MAX_AGE: "120000"
+    CALLINTER_CRUD_WORKFLOW_GEN_SETTING_ENABLED: "false"
+    CALLINTER_CRUD_GENERAL_SETTING_CATEGORY: "Callinter"
+    ## eventStore
+    CALLINTER_CRUD_EVENT_STORE_ENABLED: "true"
+    CALLINTER_CRUD_EVENT_STORE_ANALYSIS_STATUS_ALLOWED: "COMPLETED,FAILED,NLP_FAILED,ASR_FAILED,CONVERT_FAILED"
+    # app
+    CALLINTER_CRUD_PRODUCT: "callinter"
+    CALLINTER_CRUD_I18N_DEFAULT_LANG: "zhHant"
+    CALLINTER_CRUD_APP_AUTH_KEYCLOAK_CLIENT_ID: "callinter"
+    CALLINTER_CRUD_APP_AUTH_KEYCLOAK_SSL_REQUIRED: "external"
+    CALLINTER_CRUD_APP_AUTH_KEYCLOAK_RESOURCE: "callinter"
+    CALLINTER_CRUD_APP_AUTH_KEYCLOAK_PUBLIC_CLIENT: "true"
+    CALLINTER_CRUD_APP_AUTH_KEYCLOAK_CONFIDENTIAL_PORT: "0"
+    CALLINTER_CRUD_APP_AUTH_KEYCLOAK_VERIFY_TOKEN: "true"
+    CALLINTER_CRUD_APP_AUTH_KEYCLOAK_USE_ROLE_MAPPINGS: "true"
+    #database migration
+    #for new installation
+    CALLINTER_CRUD_RDBMS_MIGRATION_SCRIPTS_DIR_PATH: "src/migrations/rdbms_v2"
+    #for Upgrade
+    #CALLINTER_CRUD_RDBMS_MIGRATION_SCRIPTS_DIR_PATH: "src/migrations/rdbms"
+    ##after upgraded done ,change "src/migrations/rdbms" back to ""src/migrations/rdbms_v2"
+    CALLINTER_CRUD_RDBMS_USER: "chluatusr"
+    CALLINTER_CRUD_MINIO_ACCESS_KEY: "admin"
+    CALLINTER_CRUD_MINIO_SKIP_GET_BUCKET_REGION: "false"
+    CALLINTER_CRUD_MINIO_IGNORE_CREATE_BUCKET_ERROR: "true"
+    CALLINTER_CRUD_NATS_SERVER_ENABLE_SSL: "false"
+    CALLINTER_CRUD_RDBMS_DOMAIN: ""
+
+  envSecret:
+    CALLINTER_CRUD_RDBMS_PASSWORD: "rdbms_password"
+    CALLINTER_CRUD_MINIO_SECRET_KEY: "oss_secretkey"
+  configmapReload: {}
+  commandArgs:
+    - "-c"
+    - "/app/run.sh && /fano/fano-ms-callinter-crud"
+  resources:
+    limits:
+      cpu: 4000m
+      memory: 8192Mi
+    requests:
+      cpu: 100m
+      memory: 512Mi
+############################################################################################################################
+##    service: fano-callinter-quality-check-worker                                                                        ##
+############################################################################################################################
+fano-callinter-quality-check-worker:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: fanolabs/fano-ms-callinter-quality-check-worker
+    pullPolicy: IfNotPresent
+  env:
+    NODE_TLS_REJECT_UNAUTHORIZED: "0"
+    NODE_OPTIONS: "--max-old-space-size=8192"
+    NODE_ENV: "production"
+    TZ: "Asia/Hong_Kong"
+    QUALITY_CHECK_TENANT_ID:  "chl-uat"
+    # Server
+    QUALITY_CHECK_SERVER_PORT: "8080"
+    #QUALITY_CHECK_SERVER_SSL_CERT: "/code/fano_ms_callinter_quality_check_worker/ssl/server-cert.pem"
+    #QUALITY_CHECK_SERVER_SSL_KEY: "/code/fano_ms_callinter_quality_check_worker/ssl/server-key.pem"
+    QUALITY_CHECK_SERVER_REQUEST_TIMEOUT: "900000"
+    # Log
+    QUALITY_CHECK_LOG_LEVEL: "info"
+    QUALITY_CHECK_STACK_TRACE: "true"
+    # File Storage
+    QUALITY_CHECK_MINIO_SERVER_HOST: "fano-common-oss"
+    QUALITY_CHECK_MINIO_SERVER_PORT: "9000"
+    QUALITY_CHECK_MINIO_USE_SSL: "false"
+    QUALITY_CHECK_MINIO_BUCKET_NAME: "chl-uat"
+    QUALITY_CHECK_MINIO_REGION: "ap-east-1"
+    QUALITY_CHECK_MINIO_EXTERNAL_HOST: "https://chluat.fano.ai"
+    QUALITY_CHECK_MINIO_USE_EXTERNAL_SSL: "true"
+    QUALITY_CHECK_MINIO_ENABLE_CONTEXTUAL_PATH: "true"
+    # Score
+    QUALITY_CHECK_SCORE_SPEECH_RATE_TEXT_LENGTH_THRESHOLD: "10"
+    QUALITY_CHECK_MINIO_ACCESS_KEY: "admin"
+    QUALITY_CHECK_MINIO_SKIP_GET_BUCKET_REGION: "false"                 #Set true if using dell s3
+    QUALITY_CHECK_MINIO_IGNORE_CREATE_BUCKET_ERROR: "false"             #Set true if no listAllMyBuckets or createBucket permission
+  envSecret:
+    QUALITY_CHECK_MINIO_SECRET_KEY: "oss_secretkey"
+  commandArgs:
+    - "-c"
+    - "/app/run.sh"
+  resources:
+    limits:
+      cpu: 4000m
+      memory: 6144Mi
+    requests:
+      cpu: 100m
+      memory: 512Mi
+############################################################################################################################
+##    service: fano-callinter-speech-adapter                                                                             ##
+############################################################################################################################
+fano-callinter-speech-adapter:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: fanolabs/fano-ms-callinter-speech-adapter
+    pullPolicy: IfNotPresent
+  env:
+    NODE_TLS_REJECT_UNAUTHORIZED: "0"
+    NODE_OPTIONS: "--max-old-space-size=8192"
+    NODE_ENV: "production"
+    TZ: "Asia/Hong_Kong"
+    CALLINTER_SPEECH_ADAPTER_TENANT_ID: "chl-uat"
+    # Server
+    CALLINTER_SPEECH_ADAPTER_SERVER_PORT: "8080"
+    #CALLINTER_SPEECH_ADAPTER_SERVER_SSL_CERT: "/code/ssl/server-cert.pem"
+    #CALLINTER_SPEECH_ADAPTER_SERVER_SSL_KEY: "/code/ssl/server-key.pem"
+    CALLINTER_SPEECH_ADAPTER_SERVER_REQUEST_TIMEOUT: "900000"
+    # Log
+    CALLINTER_SPEECH_ADAPTER_LOG_LEVEL: "info"
+    CALLINTER_SPEECH_ADAPTER_STACK_TRACE: "true"
+    # Database
+    CALLINTER_SPEECH_ADAPTER_RDBMS_ENGINE: "mssql"
+    CALLINTER_SPEECH_ADAPTER_RDBMS_HOST: "192.168.174.52"
+    CALLINTER_SPEECH_ADAPTER_RDBMS_PORT: "1433"
+    CALLINTER_SPEECH_ADAPTER_RDBMS_DB: "chluat"
+    CALLINTER_SPEECH_ADAPTER_RDBMS_ENABLE_SSL: "false"
+    CALLINTER_SPEECH_ADAPTER_RDBMS_POOL_MIN: "0"
+    CALLINTER_SPEECH_ADAPTER_RDBMS_POOL_MAX: "10"
+    CALLINTER_SPEECH_ADAPTER_RDBMS_CONNECTION_ENCRYPT: "false"
+    # Nats
+    CALLINTER_SPEECH_ADAPTER_NATS_SERVER_URL: "fano-common-nats:4222"
+    CALLINTER_SPEECH_ADAPTER_NATS_STREAM_NAME: "callinter"
+    CALLINTER_SPEECH_ADAPTER_NATS_RETENTION_POLICY: "workqueue"
+    # File Storage
+    CALLINTER_SPEECH_ADAPTER_MINIO_SERVER_HOST: "fano-common-oss"
+    CALLINTER_SPEECH_ADAPTER_MINIO_SERVER_PORT: "9000"
+    CALLINTER_SPEECH_ADAPTER_MINIO_USE_SSL: "false"
+    CALLINTER_SPEECH_ADAPTER_MINIO_BUCKET_NAME: "chl-uat"
+    CALLINTER_SPEECH_ADAPTER_MINIO_URL_EXPIRY_TIME_IN_SEC: "259200" # 72 hours(72*60*60)
+    CALLINTER_SPEECH_ADAPTER_MINIO_REGION: "ap-east-1"
+    CALLINTER_SPEECH_ADAPTER_MINIO_EXTERNAL_HOST: "https://chluat.fano.ai"
+    CALLINTER_SPEECH_ADAPTER_MINIO_ENABLE_CONTEXTUAL_PATH: "true"
+    CALLINTER_SPEECH_ADAPTER_MINIO_USE_EXTERNAL_SSL: "true"
+    # schedulers
+    CALLINTER_SPEECH_ADAPTER_SCHEDULER_RECOGNIZE_REQUEUE_ENABLE: "true"
+    CALLINTER_SPEECH_ADAPTER_SCHEDULER_RECOGNIZE_REQUEUE_INTERVAL_HOUR: "2"
+    # Service
+    CALLINTER_SPEECH_ADAPTER_SPEECH_SERVER_URL: "http://fano-speech-gateway-service:3000"
+    CALLINTER_SPEECH_ADAPTER_CALLINTER_LANGUAGE_CODE_CONVERT_LIST: "zh-Hans:cmn;yue-Hant:yue;thai:th;yue-nar:yue-x-nar"
+    CALLINTER_SPEECH_ADAPTER_RDBMS_USER: "chluatusr"
+    CALLINTER_SPEECH_ADAPTER_MINIO_ACCESS_KEY: "admin"
+    CALLINTER_SPEECH_ADAPTER_MINIO_SKIP_GET_BUCKET_REGION: "false"              #Set true if using dell s3
+    CALLINTER_SPEECH_ADAPTER_MINIO_IGNORE_CREATE_BUCKET_ERROR: "false"          #Set true if no listAllMyBuckets or createBucket permission
+    CALLINTER_SPEECH_ADAPTER_NATS_SERVER_ENABLE_SSL: "false"                    #Set true if nats using TLS connection
+    CALLINTER_SPEECH_ADAPTER_RDBMS_DOMAIN: ""                                   #Set domain ip if MSSQL connects using Windows Authentication
+    CALLINTER_SPEECH_ADAPTER_RDBMS_CONNECTION_TYPE: ""  #Set 'ntlm' if MSSQL connects using Windows Authentication.
+  envSecret:
+    CALLINTER_SPEECH_ADAPTER_RDBMS_PASSWORD: "rdbms_password"
+    CALLINTER_SPEECH_ADAPTER_MINIO_SECRET_KEY: "oss_secretkey"
+  localVolume:
+    enabled: false
+    hostPath: /opt/fano/data/chl-uat/model
+  persistence:
+      enabled: false
+      accessMode: ReadWriteOnce
+      name: model
+      size: "1Gi"
+      storageClass: "managed-nfs-storage"
+  commandArgs:
+    - "-c"
+    - "/app/run.sh && /fano/fano-ms-callinter-speech-adapter"
+  resources:
+    limits:
+      cpu: 4000m
+      memory: 2048Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+############################################################################################################################
+##    service: fano-callinter-sanitising                                                                                  ##
+############################################################################################################################
+fano-callinter-sanitising:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: fanolabs/fano-ms-callinter-sanitising
+    pullPolicy: IfNotPresent
+  env:
+    NODE_TLS_REJECT_UNAUTHORIZED: "0"
+    NODE_OPTIONS: "--max-old-space-size=8192"
+    NODE_ENV: "production"
+    TZ: "Asia/Hong_Kong"
+    # Server
+    CI_SANITISING_SERVER_PORT: "8080"
+    #CI_SANITISING_SERVER_CERT: "/code/fano_ms_callinter_sanitising/ssl/server-cert.pem"
+    #CI_SANITISING_SERVER_KEY: "/code/fano_ms_callinter_sanitising/ssl/server-key.pem"
+    # Log
+    CI_SANITISING_LOG_LEVEL: "info"
+    # File Storage
+    CI_SANITISING_MINIO_SERVER_HOST: "fano-common-oss"
+    CI_SANITISING_MINIO_SERVER_PORT: "9000"
+    CI_SANITISING_MINIO_USE_SSL: "false"
+    CI_SANITISING_MINIO_BUCKET_NAME: "chl-uat"
+    CI_SANITISING_MINIO_REGION: "ap-east-1"
+    CI_SANITISING_MINIO_URL_EXPIRY_TIME_IN_SEC: "259200" # 72 hours(72*60*60)
+    CI_SANITISING_MINIO_EXTERNAL_HOST: "https://chluat.fano.ai"
+    CI_SANITISING_MINIO_ENABLE_CONTEXTUAL_PATH: "true"
+    CI_SANITISING_MINIO_USE_EXTERNAL_SSL: "true"
+    # entity
+    CI_SANITISING_ENTITY_SERVER_URL: "http://fano-nlp-entity:8080"
+    CI_SANITISING_ENTITY_REQUEST_TIMEOUT_MILLI_SEC: "300000"
+    CI_SANITISING_ENTITY_NUM_OF_SEG_PER_BATCH: "1000"
+    CI_SANITISING_ENTITY_CONCURRENT_NUMBER: "3"
+    # audio
+    CI_SANITISING_AUDIO_MASK_WINDOW_SIZE: "2"
+    # speech
+    CI_SANITISING_SPEECH_LANGUAGE_CODE_CONVERT_MAPPING: "zh-Hans:cmn;yue-Hant:yue;thai:th;yue-nar:yue-x-nar"
+    CI_SANITISING_MINIO_ACCESS_KEY: "admin"
+    CI_SANITISING_MINIO_SKIP_GET_BUCKET_REGION: "false"             #Set true if using dell s3
+    CI_SANITISING_MINIO_IGNORE_CREATE_BUCKET_ERROR: "false"         #Set true if no listAllMyBuckets or createBucket permission
+  envSecret:
+    # File Storage
+    CI_SANITISING_MINIO_SECRET_KEY: "oss_secretkey"
+  commandArgs:
+    - "-c"
+    - "/app/run.sh"
+  resources:
+    limits:
+      cpu: 4000m
+      memory: 2048Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+############################################################################################################################
+##    service: fano-callinter-download-worker                                                                     ##
+############################################################################################################################
+fano-callinter-download-worker:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: fanolabs/fano-ms-callinter-download-worker
+    pullPolicy: IfNotPresent
+  env:
+    NODE_TLS_REJECT_UNAUTHORIZED: "0"
+    NODE_OPTIONS: "--max-old-space-size=8192"
+    NODE_ENV: "production"
+    TZ: "Asia/Hong_Kong"
+    CI_DOWNLOAD_WORKER_NAMESPACE: "download-worker"
+    CI_DOWNLOAD_WORKER_TENANT_ID: "chl-uat"
+    # Server
+    CI_DOWNLOAD_WORKER_SERVER_PORT: "8080"
+    # CI_DOWNLOAD_WORKER_SERVER_CERT: "/code/fano_ms_callinter_download_worker/ssl/server-cert.pem"
+    # CI_DOWNLOAD_WORKER_SERVER_KEY: "/code/fano_ms_callinter_download_worker/ssl/server-key.pem"
+    # Log
+    CI_DOWNLOAD_WORKER_LOG_LEVEL: "info"
+    # Database
+    CI_DOWNLOAD_WORKER_RDBMS_ENGINE: "mssql"
+    CI_DOWNLOAD_WORKER_RDBMS_HOST: "192.168.174.52"
+    CI_DOWNLOAD_WORKER_RDBMS_PORT: "1433"
+    CI_DOWNLOAD_WORKER_RDBMS_DB: "chluat"
+    CI_DOWNLOAD_WORKER_RDBMS_ENABLE_SSL: "false"
+    CI_DOWNLOAD_WORKER_RDBMS_POOL_MIN: "0"
+    CI_DOWNLOAD_WORKER_RDBMS_POOL_MAX: "10"
+    CI_DOWNLOAD_WORKER_RDBMS_CONNECTION_ENCRYPT: "false"
+    # File Storage
+    CI_DOWNLOAD_WORKER_MINIO_SERVER_HOST: "fano-common-oss"
+    CI_DOWNLOAD_WORKER_MINIO_SERVER_PORT: "9000"
+    CI_DOWNLOAD_WORKER_MINIO_USE_SSL: "false"
+    CI_DOWNLOAD_WORKER_MINIO_REGION: "ap-east-1"
+    CI_DOWNLOAD_WORKER_DOWNLOAD_CENTER_MINIO_BUCKET_NAME: "chl-uat"
+    CI_DOWNLOAD_WORKER_CRUD_MINIO_BUCKET_NAME: "chl-uat"
+    CI_DOWNLOAD_WORKER_MINIO_PART_SIZE: "524288000"
+    CI_DOWNLOAD_WORKER_MINIO_EXTERNAL_HOST: "https://chluat.fano.ai"
+    CI_DOWNLOAD_WORKER_MINIO_USE_EXTERNAL_SSL: "true"
+    CI_DOWNLOAD_WORKER_MINIO_ENABLE_CONTEXTUAL_PATH: "true"
+    # nats
+    CI_DOWNLOAD_WORKER_NATS_SERVER_HOST: "fano-common-nats"
+    CI_DOWNLOAD_WORKER_NATS_SERVER_POST: "4222"
+    CI_DOWNLOAD_WORKER_NATS_STREAM_NAME: "callinter_download"
+    #schedulers
+    CI_DOWNLOAD_WORKER_PROJECT_DELETE_SCHEDULER_ENABLE: "true"
+    CI_DOWNLOAD_WORKER_DELETION_OF_COMPLETED_TASK_SCHEDULER_ENABLE: "true"
+    CI_DOWNLOAD_WORKER_TASK_RE_QUEUE_SCHEDULER_ENABLE: "true"
+    CI_DOWNLOAD_WORKER_TASK_PROGRESS_EXCEPTION_SCHEDULER_ENABLE: "true"
+    CI_DOWNLOAD_WORKER_HOUSEKEEPING_SCHEDULER_ENABLE: "true"
+    CI_DOWNLOAD_WORKER_TASK_STATUS_SYNCHRONIZATION_SCHEDULER_ENABLE: "true"
+    CI_DOWNLOAD_WORKER_DIALOGUE_SUMMARY_SCHEDULER_ENABLE: "true"
+    CI_DOWNLOAD_WORKER_SYNC_EVENT_LOG_SCHEDULER_ENABLE: "true"
+    # taskHandler
+    CI_DOWNLOAD_WORKER_DOWNLOAD_TASK_ENABLE: 'true'
+    CI_DOWNLOAD_WORKER_DOWNLOAD_TASK_SERIALIZABLE: 'true'
+    CI_DOWNLOAD_WORKER_DELETE_TASK_ENABLE: 'true'
+    CI_DOWNLOAD_WORKER_DELETE_TASK_SERIALIZABLE: 'true'
+    CI_DOWNLOAD_WORKER_CONVERSION_TASK_ENABLE: 'false'
+    CI_DOWNLOAD_WORKER_CONVERSION_TASK_SERIALIZABLE: 'false'
+    # services
+    CI_DOWNLOAD_WORKER_SERVICE_PORTAL_URL: "https://chluat.fano.ai/app/portal/apis"
+    CI_DOWNLOAD_WORKER_SERVICE_PORTAL_INTERNAL_URL: "http://fano-portal-crud:8080/portal-crud"
+    CI_DOWNLOAD_WORKER_SERVICE_CALLINTER_CRUD_URL: "http://fano-callinter-crud:8080"
+    CI_DOWNLOAD_WORKER_SERVICE_PRO_SEARCH_URL: "http://fano-prosearch-crud:8080"
+    CI_DOWNLOAD_WORKER_SERVICE_ANALYSIS_WORKER_URL: "http://fano-callinter-analyze-worker:8080"
+    # audio
+    CI_DOWNLOAD_WORKER_SILK_DECODER_PATH: "/fano/silk-v3-decoder/converter.sh"
+    CI_DOWNLOAD_WORKER_RDBMS_USER: "chluatusr"
+    CI_DOWNLOAD_WORKER_MINIO_ACCESS_KEY: "admin"
+    CI_DOWNLOAD_WORKER_MINIO_SKIP_GET_BUCKET_REGION: "fasle"        #Set true if using dell s3
+    CI_DOWNLOAD_WORKER_MINIO_IGNORE_CREATE_BUCKET_ERROR: "false"    #Set true if no listAllMyBuckets or createBucket permission
+    CI_DOWNLOAD_WORKER_NATS_SERVER_ENABLE_SSL: "false"              #Set true if nats using TLS connection
+    CI_DOWNLOAD_WORKER_RDBMS_DOMAIN: ""                             #Set domain ip if MSSQL connects using Windows Authentication
+    CI_DOWNLOAD_WORKER_RDBMS_CONNECTION_TYPE: ""    #Set 'ntlm' if MSSQL connects using Windows Authentication
+
+  envSecret:
+    CI_DOWNLOAD_WORKER_RDBMS_PASSWORD: "rdbms_password"
+    CI_DOWNLOAD_WORKER_MINIO_SECRET_KEY: "oss_secretkey"
+  commandArgs:
+    - "-c"
+    - "/app/run.sh"
+  resources:
+    limits:
+      cpu: 4000m
+      memory: 4096Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+############################################################################################################################
+##    service: fano-callinter-speech-post-processing                                                                   ##
+############################################################################################################################
+fano-callinter-speech-post-processing:
+  replicaCount: 1
+  image:
+    repository: fanolabs/fano-ms-callinter-speech-post-processing
+    pullPolicy: IfNotPresent
+  env:
+    TZ: "Asia/Hong_Kong"
+    SERVER_PORT: "8080"
+    #SERVER_SSL_CERT: "/code/ssl/server-cert.pem"
+    #SERVER_SSL_KEY: "/code/ssl/server-key.pem"
+  commandArgs:
+    - "-c"
+    - "/app/run.sh"
+  localVolume:
+    enabled: false
+    hostPath: /opt/fano/data/chl-uat/model
+  persistence:
+      enabled: false
+      accessMode: ReadWriteOnce
+      name: model
+      size: "1Gi"
+      storageClass: "managed-nfs-storage"
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+############################################################################################################################
+##    service: fano-callinter-convert-worker                                                                     ##
+############################################################################################################################
+fano-callinter-convert-worker:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: fanolabs/fano-ms-callinter-download-worker
+    pullPolicy: IfNotPresent
+  env:
+    NODE_TLS_REJECT_UNAUTHORIZED: "0"
+    NODE_OPTIONS: "--max-old-space-size=8192"
+    NODE_ENV: "production"
+    TZ: "Asia/Hong_Kong"
+    CI_DOWNLOAD_WORKER_NAMESPACE: "download-worker"
+    CI_DOWNLOAD_WORKER_TENANT_ID: "chl-uat"
+    # Server
+    CI_DOWNLOAD_WORKER_SERVER_PORT: "8080"
+    # CI_DOWNLOAD_WORKER_SERVER_CERT: "/code/fano_ms_callinter_download_worker/ssl/server-cert.pem"
+    # CI_DOWNLOAD_WORKER_SERVER_KEY: "/code/fano_ms_callinter_download_worker/ssl/server-key.pem"
+    # Log
+    CI_DOWNLOAD_WORKER_LOG_LEVEL: "info"
+    # Database
+    CI_DOWNLOAD_WORKER_RDBMS_ENGINE: "mssql"
+    CI_DOWNLOAD_WORKER_RDBMS_HOST: "192.168.174.52"
+    CI_DOWNLOAD_WORKER_RDBMS_PORT: "1433"
+    CI_DOWNLOAD_WORKER_RDBMS_DB: "chluat"
+    CI_DOWNLOAD_WORKER_RDBMS_ENABLE_SSL: "false"
+    CI_DOWNLOAD_WORKER_RDBMS_POOL_MIN: "0"
+    CI_DOWNLOAD_WORKER_RDBMS_POOL_MAX: "10"
+    CI_DOWNLOAD_WORKER_RDBMS_CONNECTION_ENCRYPT: "false"
+    # File Storage
+    CI_DOWNLOAD_WORKER_MINIO_SERVER_HOST: "fano-common-oss"
+    CI_DOWNLOAD_WORKER_MINIO_SERVER_PORT: "9000"
+    CI_DOWNLOAD_WORKER_MINIO_USE_SSL: "false"
+    CI_DOWNLOAD_WORKER_MINIO_REGION: "ap-east-1"
+    CI_DOWNLOAD_WORKER_DOWNLOAD_CENTER_MINIO_BUCKET_NAME: "chl-uat"
+    CI_DOWNLOAD_WORKER_CRUD_MINIO_BUCKET_NAME: "chl-uat"
+    CI_DOWNLOAD_WORKER_MINIO_PART_SIZE: "524288000"
+    CI_DOWNLOAD_WORKER_MINIO_EXTERNAL_HOST: "https://chluat.fano.ai"
+    CI_DOWNLOAD_WORKER_MINIO_USE_EXTERNAL_SSL: "true"
+    CI_DOWNLOAD_WORKER_MINIO_ENABLE_CONTEXTUAL_PATH: "true"
+    # nats
+    CI_DOWNLOAD_WORKER_NATS_SERVER_HOST: "fano-common-nats"
+    CI_DOWNLOAD_WORKER_NATS_SERVER_POST: "4222"
+    CI_DOWNLOAD_WORKER_NATS_STREAM_NAME: "callinter_download"
+    #schedulers
+    CI_DOWNLOAD_WORKER_PROJECT_DELETE_SCHEDULER_ENABLE: "false"
+    CI_DOWNLOAD_WORKER_DELETION_OF_COMPLETED_TASK_SCHEDULER_ENABLE: "false"
+    CI_DOWNLOAD_WORKER_TASK_RE_QUEUE_SCHEDULER_ENABLE: "false"
+    CI_DOWNLOAD_WORKER_TASK_PROGRESS_EXCEPTION_SCHEDULER_ENABLE: "false"
+    CI_DOWNLOAD_WORKER_HOUSEKEEPING_SCHEDULER_ENABLE: "false"
+    CI_DOWNLOAD_WORKER_TASK_STATUS_SYNCHRONIZATION_SCHEDULER_ENABLE: "false"
+    CI_DOWNLOAD_WORKER_DIALOGUE_SUMMARY_SCHEDULER_ENABLE: "false"
+    CI_DOWNLOAD_WORKER_SYNC_EVENT_LOG_SCHEDULER_ENABLE: "false"
+    # taskHandler
+    CI_DOWNLOAD_WORKER_DOWNLOAD_TASK_ENABLE: 'false'
+    CI_DOWNLOAD_WORKER_DOWNLOAD_TASK_SERIALIZABLE: 'false'
+    CI_DOWNLOAD_WORKER_DELETE_TASK_ENABLE: 'false'
+    CI_DOWNLOAD_WORKER_DELETE_TASK_SERIALIZABLE: 'false'
+    CI_DOWNLOAD_WORKER_CONVERSION_TASK_ENABLE: 'true'
+    CI_DOWNLOAD_WORKER_CONVERSION_TASK_SERIALIZABLE: 'true'
+    # services
+    CI_DOWNLOAD_WORKER_SERVICE_PORTAL_URL: "https://chluat.fano.ai/app/portal/apis"
+    CI_DOWNLOAD_WORKER_SERVICE_PORTAL_INTERNAL_URL: "http://fano-portal-crud:8080/portal-crud"
+    CI_DOWNLOAD_WORKER_SERVICE_CALLINTER_CRUD_URL: "http://fano-callinter-crud:8080"
+    CI_DOWNLOAD_WORKER_SERVICE_ANALYSIS_WORKER_URL: "http://fano-callinter-analyze-worker:8080"
+    # audio
+    CI_DOWNLOAD_WORKER_SILK_DECODER_PATH: "/fano/silk-v3-decoder/converter.sh"
+    CI_DOWNLOAD_WORKER_RDBMS_USER: "chluatusr"
+    CI_DOWNLOAD_WORKER_MINIO_ACCESS_KEY: "admin"
+  envSecret:
+    CI_DOWNLOAD_WORKER_RDBMS_PASSWORD: "rdbms_password"
+    CI_DOWNLOAD_WORKER_MINIO_SECRET_KEY: "oss_secretkey"
+  commandArgs:
+    - "-c"
+    - "/app/run.sh"
+  resources:
+    limits:
+      cpu: 4000m
+      memory: 4096Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+############################################################################################################################
+##    service: fano-callinter-migration                                                                                   ##
+############################################################################################################################
+fano-callinter-migration:
+  enabled: false
+  replicaCount: 1
+  crud:
+    image:
+      repository: fanolabs/fano-ms-callinter-crud
+      pullPolicy: IfNotPresent
+    env:  # Server
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
+      NODE_OPTIONS: "--max-http-header-size=81920 --max-old-space-size=8192"
+      NODE_ENV: "production"
+      TZ: "Asia/Hong_Kong"
+      CALLINTER_CRUD_TENANT_ID: "chl-uat"
+      # Server
+      CALLINTER_CRUD_SERVER_PORT: "8080"
+      #CALLINTER_CRUD_SERVER_SSL_CERT: "/code/fano_ms_callinter_crud/ssl/server-cert.pem"
+      #CALLINTER_CRUD_SERVER_SSL_KEY: "/code/fano_ms_callinter_crud/ssl/server-key.pem"
+      CALLINTER_CRUD_SERVER_REQUEST_TIMEOUT: "900000"
+      # Log
+      CALLINTER_CRUD_LOG_LEVEL: "info"
+      CALLINTER_CRUD_LOG_STACK_TRACE: "true"
+      # Database
+      CALLINTER_CRUD_RDBMS_ENGINE: "mssql"
+      CALLINTER_CRUD_RDBMS_HOST: "192.168.174.52"
+      CALLINTER_CRUD_RDBMS_PORT: "1433"
+      CALLINTER_CRUD_RDBMS_DB: "chluat"
+      CALLINTER_CRUD_RDBMS_POOL_MIN: "10"
+      CALLINTER_CRUD_RDBMS_POOL_MAX: "200"
+      CALLINTER_CRUD_RDBMS_ENABLE_SSL: "false"
+      CALLINTER_CRUD_RDBMS_CONNECTION_ENCRYPT: "false"
+      CALLINTER_CRUD_RDBMS_CONNECTION_TYPE: ""        #Set 'ntlm' if MSSQL connects using Windows Authentication
+      # File Storage
+      CALLINTER_CRUD_MINIO_SERVER_HOST: "fano-common-oss"
+      CALLINTER_CRUD_MINIO_SERVER_PORT: "9000"
+      CALLINTER_CRUD_MINIO_EXTERNAL_HOST: "chluat.fano.ai"
+      CALLINTER_CRUD_MINIO_USE_EXTERNAL_SSL: "true"
+      CALLINTER_CRUD_MINIO_ENABLE_CONTEXTUAL_PATH: "true"
+      CALLINTER_CRUD_MINIO_USE_SSL: "false"
+      CALLINTER_CRUD_MINIO_BUCKET_NAME: "chl-uat"
+      CALLINTER_CRUD_MINIO_REGION: "ap-east-1"
+      CALLINTER_CRUD_MINIO_URL_EXPIRY_TIME_IN_SEC: "86400" # 24hours(24*60*60)
+      CALLINTER_CRUD_MINIO_URL_INTERNAL_EXPIRY_TIME_IN_SEC: "604800" # (7 days. , 24*60*60*7)
+      OSS_EXTERNAL_URL: chluat.fano.ai
+      # nats
+      CALLINTER_CRUD_NATS_SERVER_URL: "fano-common-nats:4222"
+      CALLINTER_CRUD_NATS_STREAM_NAME: "callinter"
+      CALLINTER_CRUD_NATS_RETENTION_POLICY: "workqueue"
+      # schedulers
+      CALLINTER_CRUD_SCHEDULER_ANALYSIS_ENABLE_REQUEUE: "false"
+      CALLINTER_CRUD_SCHEDULER_ANALYSIS_REQUEUE_INTERVAL_MINUTE: "5"
+      CALLINTER_CRUD_SCHEDULER_ANALYSIS_ENABLE_EXCEPTION_HANDLING: "false"
+      CALLINTER_CRUD_SCHEDULER_ANALYSIS_EXCEPTION_HANDLING_INTERVAL_HOUR: "1"
+      CALLINTER_CRUD_SCHEDULER_GENERAL_SETTING_ENABLE_REFRESH: "false"
+      CALLINTER_CRUD_SCHEDULER_GENERAL_SETTING_INTERVAL_MINUTE: "1"
+      # injectionRiskChecking
+      CALLINTER_CRUD_INJECTION_RISK_CHECKING_JS: "<script"
+      # auth
+      ## keycloak
+      CALLINTER_CRUD_AUTH_KEYCLOAK_SERVER_URL: "https://chluat.fano.ai/iam"
+      CALLINTER_CRUD_AUTH_KEYCLOAK_INTERNAL_SERVER_URL: "http://fano-portal-keycloak:8080/iam"
+      CALLINTER_CRUD_AUTH_KEYCLOAK_REALM: "fanolabs"
+      CALLINTER_CRUD_AUTH_KEYCLOAK_RESOURCE: "callinter"
+      # services
+      ## portal
+      CALLINTER_CRUD_PORTAL_SERVER_URL: "https://chluat.fano.ai/portal-crud"
+      CALLINTER_CRUD_PORTAL_FRONT_END_URL: "https://chluat.fano.ai/app/portal"
+      CALLINTER_CRUD_PORTAL_INTERNAL_SERVER_URL: "http://fano-portal-crud:8080/portal-crud"
+      ## intent
+      CALLINTER_CRUD_INTENT_SERVER_URL: "https://chluat.fano.ai/nlp-crud"
+      ## entity
+      CALLINTER_CRUD_ENTITY_SERVER_URL: "http://fano-nlp-entity:8080"
+      ## pattern
+      CALLINTER_CRUD_PATTERN_SERVER_URL: "http://fano-nlp-pattern-recognition:8080"
+      ## wordCount
+      CALLINTER_CRUD_WORD_COUNT_SERVER_URL: "http://fano-nlp-word-count:8080"
+      ## quality-check
+      CALLINTER_CRUD_QUALITY_CHECK_SERVER_URL: "http://fano-callinter-quality-check-worker:8080"
+      CALLINTER_CRUD_ANALYZE_WORKER_SERVER_URL: "http://fano-callinter-analyze-worker:8080"
+      ## datepanel
+      CALLINTER_CRUD_DATA_PANEL_SERVER_URL: "https://chluat.fano.ai/datapanel-crud"
+      ## Speech
+      CALLINTER_CRUD_SPEECH_SERVER_URL: "http://fano-speech-gateway-service:3000"
+      CALLINTER_CRUD_SPEECH_CALLINTER_LANGUAGE_CODE_CONVERT_LIST: "zh-Hans:cmn;yue-Hant:yue;thai:th;yue-nar:yue-x-nar"
+      ## license
+      CALLINTER_CRUD_LICENSE_SERVER_URL: "http://fano-common-license-client:8080"
+      ## proSearch
+      CALLINTER_CRUD_PRO_SEARCH_SERVER_URL: 'http://fano-prosearch-crud:8080'
+      ## sanitising
+      CALLINTER_CRUD_SANITISING_SERVER_URL: "http://fano-callinter-sanitising:8080"
+      CALLINTER_CRUD_SANITISE_TIMEOUT_MILLI_SEC: "120000"
+      ## adapter
+      CALLINTER_CRUD_SPEECH_ADDAPTER_SERVER_URL: "http://fano-callinter-speech-adapter:8080"
+      ## downloadWorker
+      CALLINTER_CRUD_DOWNLOAD_WORKER_SERVER_URL: "http://fano-callinter-download-worker:8080"
+      # modules
+      ## Audio
+      CALLINTER_CRUD_AUDIO_SUPPORTED_LANGUAGE_CODES: "yue-Hant,zh-Hans,en,yue-x-auto,yue-nar,yue-x-narauto,en-x-nar,cmn-x-nar,vi,th,fr"
+      CALLINTER_CRUD_AUDIO_DEFAULT_LANGUAGE_CODE: "yue-Hant"
+      CALLINTER_CRUD_AUDIO_DEFAULT_CHAT_LOG_LANGUAGE_CODE: "yue-x-auto"
+      CALLINTER_CRUD_UPLOAD_AUDIO_DEFAULT_DIARIZATION_VALUE: "true"
+      CALLINTER_CRUD_UPLOAD_AUDIO_IS_CONVERSION_ON: "true"
+      CALLINTER_CRUD_UPLOAD_AUDIO_CONVERSION_FORCE_CONVERT: "true"
+      CALLINTER_CRUD_UPLOAD_AUDIO_CONVERSION_DEFAULT_MEDIA_TYPE: "flac"
+      CALLINTER_CRUD_UPLOAD_AUDIO_CONVERSION_DEFAULT_MEDIA_SAMPLE_RATE: "16000"
+      CALLINTER_CRUD_UPLOAD_AUDIO_CONVERSION_USE_DEFAULT_MEDIA_SAMPLE_RATE: "true"
+      CALLINTER_CRUD_UPLOAD_AUDIO_CONVERSION_SILK_DECODER_PATH: "/fano/silk-v3-decoder/converter.sh"
+      ## Chat Log
+      CALLINTER_CRUD_UPLOAD_CHAT_LOG_FIELD_SESSION_ID: "Session ID"
+      CALLINTER_CRUD_UPLOAD_CHAT_LOG_FIELD_SPEAKER_ROLE: "Speaker"
+      CALLINTER_CRUD_UPLOAD_CHAT_LOG_FIELD_TEXT: "Text"
+      CALLINTER_CRUD_UPLOAD_CHAT_LOG_FIELD_CHAT_TIME: "Chat Time"
+      CALLINTER_CRUD_QUOTA_UNIT: "15" ## 1 quota = 15 sec
+      ## sanitising
+      CALLINTER_CRUD_SANITISING_IS_SANITISING_ON: "true"
+      # endpoints
+      CALLINTER_CRUD_ENDPOINTS_MAX_FILE_UPLOAD_NUMBER_LIMIT: "200"
+      CALLINTER_CRUD_ENDPOINTS_MAX_PAGINATION_LIMIT: "500"
+      ## syncer
+      CALLINTER_CRUD_SYNCER_ENABLED: "false"
+      ## workflow
+      CALLINTER_CRUD_WORKFLOW_GEN_SETTING_CATEGORY: "callinter"
+      CALLINTER_CRUD_WORKFLOW_GEN_SETTING_GROUP_NAME: "workflow"
+      CALLINTER_CRUD_WORKFLOW_GEN_SETTING_ITEM_KEY: "workflowStatusConfig"
+      CALLINTER_CRUD_WORKFLOW_GEN_SETTING_ITEM_TYPE: "File"
+      CALLINTER_CRUD_WORKFLOW_CACHE_MAX_AGE: "120000"
+      CALLINTER_CRUD_WORKFLOW_GEN_SETTING_ENABLED: "false"
+      CALLINTER_CRUD_GENERAL_SETTING_CATEGORY: "Callinter"
+      ## eventStore
+      CALLINTER_CRUD_EVENT_STORE_ENABLED: "true"
+      CALLINTER_CRUD_EVENT_STORE_ANALYSIS_STATUS_ALLOWED: "COMPLETED,FAILED,NLP_FAILED,ASR_FAILED,CONVERT_FAILED"
+      # app
+      CALLINTER_CRUD_PRODUCT: "callinter"
+      CALLINTER_CRUD_I18N_DEFAULT_LANG: "zhHant"
+      CALLINTER_CRUD_APP_AUTH_KEYCLOAK_CLIENT_ID: "callinter"
+      CALLINTER_CRUD_APP_AUTH_KEYCLOAK_SSL_REQUIRED: "external"
+      CALLINTER_CRUD_APP_AUTH_KEYCLOAK_RESOURCE: "callinter"
+      CALLINTER_CRUD_APP_AUTH_KEYCLOAK_PUBLIC_CLIENT: "true"
+      CALLINTER_CRUD_APP_AUTH_KEYCLOAK_CONFIDENTIAL_PORT: "0"
+      CALLINTER_CRUD_APP_AUTH_KEYCLOAK_VERIFY_TOKEN: "true"
+      CALLINTER_CRUD_APP_AUTH_KEYCLOAK_USE_ROLE_MAPPINGS: "true"
+      #database migration
+      #for new installation
+      CALLINTER_CRUD_RDBMS_MIGRATION_SCRIPTS_DIR_PATH: "src/migrations/rdbms_v2"
+      #for Upgrade
+      #CALLINTER_CRUD_RDBMS_MIGRATION_SCRIPTS_DIR_PATH: "src/migrations/rdbms"
+      ##after upgraded done ,change "src/migrations/rdbms" back to ""src/migrations/rdbms_v2"
+      CALLINTER_CRUD_RDBMS_USER: "chluatusr"
+      CALLINTER_CRUD_MINIO_ACCESS_KEY: "admin"
+      CALLINTER_CRUD_MINIO_SKIP_GET_BUCKET_REGION: "false"
+      CALLINTER_CRUD_MINIO_IGNORE_CREATE_BUCKET_ERROR: "true"
+      CALLINTER_CRUD_NATS_SERVER_ENABLE_SSL: "false"
+      CALLINTER_CRUD_RDBMS_DOMAIN: ""
+
+    envSecret:
+      CALLINTER_CRUD_RDBMS_PASSWORD: "rdbms_password"
+      CALLINTER_CRUD_MINIO_SECRET_KEY: "oss_secretkey"
+    configmapReload: {}
+    command:
+      - "/bin/sh"
+    commandArgs:
+      - "-c"
+      - "/app/run.sh && /fano/fano-ms-callinter-crud pipeline migrate && /fano/fano-ms-callinter-crud "
+    resources:
+      limits:
+        cpu: 4000m
+        memory: 8192Mi
+      requests:
+        cpu: 100m
+        memory: 512Mi
+  analyzeworker:
+    image:
+      repository: fanolabs/fano-ms-callinter-analyze-worker
+      pullPolicy: IfNotPresent
+    env:
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
+      NODE_OPTIONS: "--max-old-space-size=8192"
+      NODE_ENV: "production"
+      TZ: "Asia/Hong_Kong"
+      CALLINTER_ANALYZE_WORKER_TENANT_ID: "chl-uat"
+      # Server
+      CALLINTER_ANALYZE_WORKER_SERVER_PORT: "9091"
+      #CALLINTER_ANALYZE_WORKER_SERVER_SSL_CERT: "/code/fano_ms_callinter_analyze_worker/ssl/server-cert.pem"
+      #CALLINTER_ANALYZE_WORKER_SERVER_SSL_KEY: "/code/fano_ms_callinter_analyze_worker/ssl/server-key.pem"
+      CALLINTER_ANALYZE_WORKER_SERVER_REQUEST_TIMEOUT: "900000"
+      # Log
+      CALLINTER_ANALYZE_WORKER_LOG_LEVEL: "info"
+      CALLINTER_ANALYZE_WORKER_STACK_TRACE: "true"
+      # DB
+      CALLINTER_ANALYZE_WORKER_RDBMS_ENGINE: "mssql"
+      CALLINTER_ANALYZE_WORKER_RDBMS_HOST: "192.168.174.52"
+      CALLINTER_ANALYZE_WORKER_RDBMS_PORT: "1433"
+      CALLINTER_ANALYZE_WORKER_RDBMS_DB: "chluat"
+      CALLINTER_ANALYZE_WORKER_RDBMS_POOL_MIN: "0"
+      CALLINTER_ANALYZE_WORKER_RDBMS_POOL_MAX: "10"
+      CALLINTER_ANALYZE_WORKER_RDBMS_ENABLE_SSL: "false"
+      CALLINTER_ANALYZE_WORKER_RDBMS_CONNECTION_ENCRYPT: "false"
+      # Nats
+      CALLINTER_ANALYZE_WORKER_NATS_SERVER_URL: "fano-common-nats:4222"
+      CALLINTER_ANALYZE_WORKER_NATS_STREAM_NAME: "callinter"
+      CALLINTER_ANALYZE_WORKER_NATS_RETENTION_POLICY: "workqueue"
+      # File Storage
+      CALLINTER_ANALYZE_WORKER_MINIO_SERVER_HOST: "fano-common-oss"
+      CALLINTER_ANALYZE_WORKER_MINIO_SERVER_PORT: "9000"
+      CALLINTER_ANALYZE_WORKER_MINIO_USE_SSL: "false"
+      CALLINTER_ANALYZE_WORKER_MINIO_BUCKET_NAME: "chl-uat"
+      CALLINTER_ANALYZE_WORKER_MINIO_REGION: "ap-east-1"
+      CALLINTER_ANALYZE_WORKER_MINIO_URL_EXPIRY_TIME_IN_SEC: "604800" # 7 days(72*60*60*7)
+      CALLINTER_ANALYZE_WORKER_MINIO_EXTERNAL_HOST: "https://chluat.fano.ai"
+      CALLINTER_ANALYZE_WORKER_MINIO_ENABLE_CONTEXTUAL_PATH: "true"
+      CALLINTER_ANALYZE_WORKER_MINIO_USE_EXTERNAL_SSL: "true"
+      # Services
+      CALLINTER_ANALYZE_WORKER_SERVER_URL: "http://fano-callinter-analyze-worker:8080"
+      CALLINTER_ANALYZE_WORKER_CRUD_SERVER_URL: "http://fano-callinter-crud:8080"
+      CALLINTER_ANALYZE_WORKER_NLP_TASK_SERVER_URL: "http://fano-nlp-task:8080"
+      CALLINTER_ANALYZE_WORKER_INTENT_SERVER_URL: "http://fano-nlp-intent:8080"
+      CALLINTER_ANALYZE_WORKER_ENTITY_SERVER_URL: "http://fano-nlp-entity:8080"
+      CALLINTER_ANALYZE_WORKER_SPEECH_PATTERN_SERVER_URL: "http://fano-nlp-pattern-recognition:8080"
+      CALLINTER_ANALYZE_WORKER_WORD_COUNT_SERVER_URL: "http://fano-nlp-word-count:8080"
+      CALLINTER_ANALYZE_WORKER_QUALITY_CHECK_SERVER_URL: "http://fano-callinter-quality-check-worker:8080"
+      CALLINTER_ANALYZE_WORKER_SPEECH_ADAPTER_SERVER_URL: "http://fano-callinter-speech-adapter:8080"
+      CALLINTER_ANALYZE_WORKER_SPEECH_SERVER_URL: "http://fano-speech-gateway-service:3000"
+      CALLINTER_ANALYZE_WORKER_SPEECH_DEFAULT_PHRASE_REPLACEMENT_LANG_CODE: "yue"
+      CALLINTER_ANALYZE_WORKER_LANGUAGE_CODE_CONVERT_LIST: "zh-Hans:cmn;yue-Hant:yue;thai:th;yue-nar:yue-x-nar"
+      CALLINTER_ANALYZE_WORKER_SANITISING_SERVER_URL: "http://fano-callinter-sanitising:8080"
+      CALLINTER_ANALYZE_WORKER_RDBMS_USER: "chluatusr"
+      CALLINTER_ANALYZE_WORKER_MINIO_ACCESS_KEY: "admin"
+      CALLINTER_ANALYZE_WORKER_MINIO_SKIP_GET_BUCKET_REGION: "false"                              #Set true if using dell s3
+      CALLINTER_ANALYZE_WORKER_MINIO_IGNORE_CREATE_BUCKET_ERROR: "false"                          #Set true if no listAllMyBuckets or createBucket permission
+      CALLINTER_ANALYZE_WORKER_NATS_SERVER_ENABLE_SSL: "false"                                    #Set true if nats using TLS connection
+      CALLINTER_ANALYZE_WORKER_RDBMS_DOMAIN: ""                                                   #Set domain ip if MSSQL connects using Windows Authentication
+      CALLINTER_ANALYZE_WORKER_RDBMS_CONNECTION_TYPE: ""        #Set 'ntlm' if MSSQL connects using Windows Authentication
+    envSecret:
+      CALLINTER_ANALYZE_WORKER_RDBMS_PASSWORD: "rdbms_password"
+      CALLINTER_ANALYZE_WORKER_MINIO_SECRET_KEY: "oss_secretkey"
+    command:
+      - "/bin/sh"
+    commandArgs:
+      - "-c"
+      - "/app/run.sh && /fano/fano-ms-callinter-analyze-worker migrate:latest && /fano/fano-ms-callinter-analyze-worker"
+    resources:
+      limits:
+        cpu: 4000m
+        memory: 2048Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+  speechadapter:
+    image:
+      repository: fanolabs/fano-ms-callinter-speech-adapter
+      pullPolicy: IfNotPresent
+    env:
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
+      NODE_OPTIONS: "--max-old-space-size=8192"
+      NODE_ENV: "production"
+      TZ: "Asia/Hong_Kong"
+      CALLINTER_SPEECH_ADAPTER_TENANT_ID: "chl-uat"
+      # Server
+      CALLINTER_SPEECH_ADAPTER_SERVER_PORT: "9092"
+      #CALLINTER_SPEECH_ADAPTER_SERVER_SSL_CERT: "/code/ssl/server-cert.pem"
+      #CALLINTER_SPEECH_ADAPTER_SERVER_SSL_KEY: "/code/ssl/server-key.pem"
+      CALLINTER_SPEECH_ADAPTER_SERVER_REQUEST_TIMEOUT: "900000"
+      # Log
+      CALLINTER_SPEECH_ADAPTER_LOG_LEVEL: "info"
+      CALLINTER_SPEECH_ADAPTER_STACK_TRACE: "true"
+      # Database
+      CALLINTER_SPEECH_ADAPTER_RDBMS_ENGINE: "mssql"
+      CALLINTER_SPEECH_ADAPTER_RDBMS_HOST: "192.168.174.52"
+      CALLINTER_SPEECH_ADAPTER_RDBMS_PORT: "1433"
+      CALLINTER_SPEECH_ADAPTER_RDBMS_DB: "chluat"
+      CALLINTER_SPEECH_ADAPTER_RDBMS_ENABLE_SSL: "false"
+      CALLINTER_SPEECH_ADAPTER_RDBMS_POOL_MIN: "0"
+      CALLINTER_SPEECH_ADAPTER_RDBMS_POOL_MAX: "10"
+      CALLINTER_SPEECH_ADAPTER_RDBMS_CONNECTION_ENCRYPT: "false"
+      # Nats
+      CALLINTER_SPEECH_ADAPTER_NATS_SERVER_URL: "fano-common-nats:4222"
+      CALLINTER_SPEECH_ADAPTER_NATS_STREAM_NAME: "callinter"
+      CALLINTER_SPEECH_ADAPTER_NATS_RETENTION_POLICY: "workqueue"
+      # File Storage
+      CALLINTER_SPEECH_ADAPTER_MINIO_SERVER_HOST: "fano-common-oss"
+      CALLINTER_SPEECH_ADAPTER_MINIO_SERVER_PORT: "9000"
+      CALLINTER_SPEECH_ADAPTER_MINIO_USE_SSL: "false"
+      CALLINTER_SPEECH_ADAPTER_MINIO_BUCKET_NAME: "chl-uat"
+      CALLINTER_SPEECH_ADAPTER_MINIO_URL_EXPIRY_TIME_IN_SEC: "259200" # 72 hours(72*60*60)
+      CALLINTER_SPEECH_ADAPTER_MINIO_REGION: "ap-east-1"
+      CALLINTER_SPEECH_ADAPTER_MINIO_EXTERNAL_HOST: "https://chluat.fano.ai"
+      CALLINTER_SPEECH_ADAPTER_MINIO_ENABLE_CONTEXTUAL_PATH: "true"
+      CALLINTER_SPEECH_ADAPTER_MINIO_USE_EXTERNAL_SSL: "true"
+      # schedulers
+      CALLINTER_SPEECH_ADAPTER_SCHEDULER_RECOGNIZE_REQUEUE_ENABLE: "false"
+      CALLINTER_SPEECH_ADAPTER_SCHEDULER_RECOGNIZE_REQUEUE_INTERVAL_HOUR: "2"
+      # Service
+      CALLINTER_SPEECH_ADAPTER_SPEECH_SERVER_URL: "http://fano-speech-gateway-service:3000"
+      CALLINTER_SPEECH_ADAPTER_CALLINTER_LANGUAGE_CODE_CONVERT_LIST: "zh-Hans:cmn;yue-Hant:yue;thai:th;yue-nar:yue-x-nar"
+      CALLINTER_SPEECH_ADAPTER_RDBMS_USER: "chluatusr"
+      CALLINTER_SPEECH_ADAPTER_MINIO_ACCESS_KEY: "admin"
+      CALLINTER_SPEECH_ADAPTER_MINIO_SKIP_GET_BUCKET_REGION: "false"              #Set true if using dell s3
+      CALLINTER_SPEECH_ADAPTER_MINIO_IGNORE_CREATE_BUCKET_ERROR: "false"          #Set true if no listAllMyBuckets or createBucket permission
+      CALLINTER_SPEECH_ADAPTER_NATS_SERVER_ENABLE_SSL: "false"                    #Set true if nats using TLS connection
+      CALLINTER_SPEECH_ADAPTER_RDBMS_DOMAIN: ""                                   #Set domain ip if MSSQL connects using Windows Authentication
+      CALLINTER_SPEECH_ADAPTER_RDBMS_CONNECTION_TYPE: ""  #Set 'ntlm' if MSSQL connects using Windows Authentication.
+    envSecret:
+      CALLINTER_SPEECH_ADAPTER_RDBMS_PASSWORD: "rdbms_password"
+      CALLINTER_SPEECH_ADAPTER_MINIO_SECRET_KEY: "oss_secretkey"
+    localVolume:
+      enabled: false
+      hostPath: /opt/fano/data/chl-uat/model
+    persistence:
+        enabled: false
+        accessMode: ReadWriteOnce
+        name: model
+        size: "1Gi"
+        storageClass: "managed-nfs-storage"
+    command:
+      - "/bin/sh"
+    commandArgs:
+      - "-c"
+      - "/app/run.sh && /fano/fano-ms-callinter-speech-adapter migrate:latest && /fano/fano-ms-callinter-speech-adapter"
+    resources:
+      limits:
+        cpu: 4000m
+        memory: 2048Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi

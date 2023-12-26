@@ -1,0 +1,15 @@
+fano-portal-web:
+  enabled: true
+  image:
+    tag: 23.06.5-v1.19.7-ubi8.8
+fano-portal-crud:
+  enabled: true
+  image:
+    tag: 23.06.5-v1.13.9-ubi8.8
+fano-portal-keycloak:
+  enabled: true
+  initData:
+    image:
+      tag: 23.06.5-v23.10.03-ubi8.8
+  image:
+    tag: 23.06.5-v21.1.2-mssql-ubi8.8

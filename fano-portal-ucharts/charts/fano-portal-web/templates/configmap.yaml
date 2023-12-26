@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: appportalconfig
+  labels:
+    {{- include "fanolabs.labels" . | nindent 4 }}
+data:
+  portalInitData.js: |-
+    const initData = "{{ .Files.Get "portal_initData.js" | b64enc }}";
+  datapanelInitData.js: |-
+    const initData = "{{ .Files.Get "datapanel_initData.js" | b64enc }}";
+  nlpInitData.js: |-
+    const initData = "{{ .Files.Get "nlp_initData.js" | b64enc }}";
+  focotalkInitData.js: |-
+    const initData = "{{ .Files.Get "focotalk_initData.js" | b64enc }}";

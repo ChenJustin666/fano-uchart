@@ -1,0 +1,45 @@
+image:
+  name: 'hub.fano.ai/fanolabs/fano_ms_license_control'
+  tag: 'master'
+  pullPolicy: IfNotPresent
+rdbms:
+  type: 'postgresql'
+  url: 'test-postgresql'
+  port: 5432
+  database: 'speech-license-control'
+  auth:
+    enabled: true
+    # secret key: username, password
+    existingSecret: 'postgres-db-secret'
+parameter:
+  licenseServerUrl: 'https://license-control-dev.fano.ai/license-server'
+  jwtSecret: 'mileswen'
+  LicenseControlEnv: 'infra-testing'
+service:
+  type: ClusterIP
+## @param podAffinityPreset Pod affinity preset. Ignored if `affinity` is set. Allowed values: `soft` or `hard`
+## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+##
+podAffinityPreset: ""
+## @param podAntiAffinityPreset Pod anti-affinity preset. Ignored if `affinity` is set. Allowed values: `soft` or `hard`
+## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+##
+podAntiAffinityPreset: soft
+## Node affinity preset
+## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+##
+nodeAffinityPreset:
+  ## @param nodeAffinityPreset.type Node affinity preset type. Ignored if `affinity` is set. Allowed values: `soft` or `hard`
+  ##
+  type: ""
+  ## @param nodeAffinityPreset.key Node label key to match. Ignored if `affinity` is set.
+  ## E.g.
+  ## key: "kubernetes.io/e2e-az-name"
+  ##
+  key: ""
+  ## @param nodeAffinityPreset.values Node label values to match. Ignored if `affinity` is set.
+  ## E.g.
+  ## values:
+  ##   - e2e-az1
+  ##   - e2e-az2
+  ##

@@ -1,0 +1,70 @@
+
+jobs:
+  - name: db-backup
+    image:
+      repository: hub.fano.ai/thirdparty/db_backup
+      tag: v0.0.8
+      imagepullPolicy: IfNotPresent
+      imagePullSecrets:
+        - fano-secret
+        - fano-secret-hk
+    # optional env vars
+    env:
+      MINIO_HOST: "backup-minio.minio.svc.cluster.local:9000"
+      #MINIO_HOST: "192.168.1.150:30009"
+      BUCKET_NAME: "db-backup"
+      # NAMESPACES: "lucas-testing"
+      MYSQL_HOST: "mysql"
+      MYSQL_USER: "root"
+      MYSQL_DATABASES: "tdrica"
+      MYSQL_IGNORE_TABLE:  "test1|test2"
+      USE_MINIO: "True"
+      BACKUP_MYSQL: "false"
+      BACKUP_MONGODB: "True"
+      MONGO_SSL: "false"
+      BACKUP_POSTGRES: "True"
+      PG_HOST: "postgres"
+      PG_USER: "postgres"
+      SCHEDULER_TIME: "52 16 * * *"
+      DEPLOY_MODE: "k8s"
+    envSecret:
+      PG_PASS: "@{POSTGRES_PASSWORD}"
+      MONGO_URI: "@{MONGODB_URL}"
+      MYSQL_PASS: "@{MYSQL_PASSWORD}"
+      MINIO_ACCESS_KEY: "admin"
+      MINIO_SECRET_KEY: "38sjSlz2ZsIiswu11"
+    schedule: "33 13 * * *"
+    command: ["/bin/sh"]
+    args:
+      - "-c"
+      - "python /opt/fano/bin/db-backup.py"
+    resources:
+      limits:
+        cpu: 200m
+        memory: 2000Mi
+      requests:
+        cpu: 50m
+        memory: 256Mi
+    failedJobsHistoryLimit: 1
+    successfulJobsHistoryLimit: 3
+    concurrencyPolicy: Forbid
+    restartPolicy: Never
+    volumes:
+    - name: dbbackup
+      hostPath:
+        path: /opt/fano/data/chl-uat
+    volumeMounts:
+    - name: dbbackup
+      mountPath: /opt/fano/data/chl-uat
+    tolerations:
+    - effect: NoSchedule
+      operator: Exists
+    # affinity:
+    #   nodeAffinity:
+    #     requiredDuringSchedulingIgnoredDuringExecution:
+    #       nodeSelectorTerms:
+    #       - matchExpressions:
+    #         - key: node
+    #           operator: In
+    #           values:
+    #           - lucas-testing

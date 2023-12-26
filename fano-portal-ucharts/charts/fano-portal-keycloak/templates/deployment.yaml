@@ -1,0 +1,173 @@
+{{- $fullName := include "fanolabs.name" . -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "fanolabs.name" . }}
+  labels:
+    {{- include "fanolabs.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "fanolabs.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "fanolabs.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- if .Values.global.hostAliases.enabled }}
+      hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.global.hostAliases.values "context" $) | nindent 8 }}
+      {{- end }}
+      {{- include "common.imagePullSecrets" . | nindent 6 }}
+      serviceAccountName: {{ include "fanolabs.serviceAccountName" . }}
+      {{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      volumes:
+      # - name: fano-ssl
+      #   secret:
+      #     secretName: fano-cert
+      - name: tmp
+        emptyDir: {}
+      - name: core
+        emptyDir: {}
+      - name: home
+        emptyDir: {}
+      - name: fano
+      - configMap:
+          defaultMode: 0777
+          name: keycloakconfig
+        name: keycloakconfig
+      - name: themes
+        {{- if .Values.persistence.enabled }}
+        persistentVolumeClaim:
+          claimName: {{ include "fanocommon.claimName" ( dict "persistence" .Values.persistence "global" .Values.global) }}
+        {{- else if .Values.localVolume.enabled }}
+        hostPath:
+          path: {{ .Values.localVolume.hostPath }}
+        {{- else }}
+        emptyDir: {}
+        {{- end }}
+      {{- if .Values.initData.enabled }}
+      initContainers:
+        - name: fano-{{ .Chart.Name | regexFind "[^-]+$" }}-init-data
+          image: {{ include "common.images.image" (dict "imageRoot" .Values.initData.image "global" .Values.global) }}
+          imagePullPolicy: "{{ .Values.initData.image.pullPolicy }}"
+          {{- if .Values.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          command:
+            - /bin/sh
+          args:
+            - "-c"
+            - "/app/run.sh {{ .Values.mountPath }} keycloak {{ .Values.mountPath }}"
+          env:
+          {{- range $key, $value := .Values.initData.env }}
+            - name: "{{ $key }}"
+              value: "{{ $value }}"
+          {{- end }}
+          {{- range $key, $value := .Values.initData.envSecret }}
+            - name: "{{ $key }}"
+              valueFrom:
+                secretKeyRef:
+                  name: "fano-common-secret"
+                  key: {{ $value }}
+          {{- end }}
+          volumeMounts:
+            - name: fano
+              mountPath: /fano
+            - name: tmp
+              mountPath: /tmp/data/
+            - name: themes
+              mountPath: {{ .Values.mountPath }}
+              {{- if .Values.persistence.enabled }}
+              subPath: {{ .Values.persistence.subPath }}
+              {{- end }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- if .Values.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          image: {{ template "fano-common.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.command }}
+          command:
+            {{- range .Values.command }}
+            - {{ . | quote }}
+            {{- end }}
+          {{- end }}
+          {{- if .Values.commandArgs }}
+          args:
+            {{- range .Values.commandArgs }}
+            - {{ . | quote }}
+            {{- end }}
+          {{- end }}
+          env:
+          {{- range $key, $value := .Values.env }}
+            - name: "{{ $key }}"
+              value: "{{ $value }}"
+          {{- end }}
+          {{- range $key, $value := .Values.envSecret }}
+            - name: "{{ $key }}"
+              valueFrom:
+                secretKeyRef:
+                  name: "fano-common-secret"
+                  key: {{ $value }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            # - name: fano-ssl
+            #   mountPath: /opt/keycloak/cert
+            - name: tmp
+              mountPath: /tmp
+            - name: core
+              mountPath: /opt/keycloak
+            - name: home
+              mountPath: /home
+            - name: home
+              mountPath: /.keycloak
+            - name: themes
+              mountPath: {{ .Values.mountPath }}
+              {{- if .Values.persistence.enabled }}
+              subPath: {{ .Values.persistence.subPath }}
+              {{- end }}
+            - mountPath: /opt/keycloak/fanolabs-realm.json
+              name: keycloakconfig
+              subPath: fanolabs-realm.json
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          lifecycle:
+            {{- toYaml .Values.lifecycle | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.affinity }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- else }}
+      affinity:
+        podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.podAffinityPreset "context" $) | nindent 10 }}
+        podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.podAntiAffinityPreset "context" $) | nindent 10 }}
+        nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.nodeAffinityPreset.type "key" .Values.nodeAffinityPreset.key "values" .Values.nodeAffinityPreset.values "global" .Values.global ) | nindent 10 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

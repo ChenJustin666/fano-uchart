@@ -1,0 +1,39 @@
+fano-license-control:
+  enabled: false
+license-client:
+  enabled: true
+  image:
+    tag: 23.06.5-v2.1.3-ubi8.8
+redis:
+  enabled: true
+  image:
+    tag: 23.06.5-v7.0.13-ubi8.8
+oss:
+  enabled: true
+  image:
+    tag: 23.06.5-v1.3.5-ubi8.8
+  volumePermissions:
+    enabled: true
+    image:
+      tag: 23.06.4-v2.1.0.0-alpha-ubi8.8
+oss-gateway:
+  enabled: false
+  image:
+    tag: 23.06.5-v1.3.5-ubi8.8
+postgresql:
+  enabled: false
+  image:
+    tag: '13.3.0'
+mysql:
+  enabled: false
+  image:
+    tag: 8.0.27-debian-10-r78
+nats:
+  enabled: true
+  nats:
+    image:
+      tag: 23.06.5-v2.9.23-ubi8.8
+db-backup:
+  enabled: false
+redis-debian:
+  enabled: false

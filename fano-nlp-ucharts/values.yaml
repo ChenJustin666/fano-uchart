@@ -1,0 +1,501 @@
+global:
+  serviceAccount: "default"
+  imageRegistry: 'hub.fano.ai'
+  imagePullSecrets:
+    - fano-secret-hk
+  nodeAffinityPreset:
+    type: ""
+    key: "node"
+    values:
+      - "chl-uat"
+  hostAliases:
+    enabled: true
+    values:
+      - ip: "192.168.174.20"
+        hostnames:
+        - "chluat.fano.ai"
+
+############################################################################################################################
+##    service: fano-nlp-crud                                                                                              ##
+############################################################################################################################
+fano-nlp-crud:
+  replicaCount: 1
+  image:
+    repository: fanolabs/fano-nlp-crud
+    pullPolicy: IfNotPresent
+  env:
+    TZ: "Asia/Hong_Kong"
+    NODE_TLS_REJECT_UNAUTHORIZED: "0"
+    NODE_OPTIONS: "--max-http-header-size=81920"
+    NLP_CRUD_ROUTER_PREFIX: "/nlp-crud"
+    MINIO_ENDPOINT: fano-common-oss
+    MINIO_PORT: 9000
+    MINIO_BUCKET: chl-uat
+    PORTAL_RDMBS_CONNECTION_TYPE: sql-login #Set 'ntlm' if MSSQL connects using Windows Authentication
+    PORTAL_RDBMS_ENGINE: mssql
+    PORTAL_RDBMS_HOST: 192.168.174.52
+    PORTAL_RDBMS_PORT: 1433
+    PORTAL_RDBMS_USER: chluatusr
+    PORTAL_RDBMS_DB: chluat
+    PORTAL_RDMBS_REQUIRE_ENCRYPT: "false"
+    PORTAL_RDMBS_REQUIRE_SERCURE_TRANSPORT: "false"
+    PORTAL_RDMBS_POOL_MIN: 10
+    PORTAL_RDMBS_POOL_MAX: 200
+    PORTAL_INTENT_NODE_ENV: production
+    PORTAL_INTENT_PORT: 8080
+    PORTAL_INTENT_NLP_INTENT_ENDPOINT: http://fano-nlp-intent:8080
+    PORTAL_INTENT_NLP_TRAINING_TASK_ENDPOINT: http://fano-nlp-task:8080
+    PORTAL_INTENT_NLP_CLUSTER_TASK_ENDPOINT: http://fano-nlp-task:8080
+    PORTAL_INTENT_NLP_ENTIY_ENDPOINT: http://fano-nlp-entity:8080
+    PORTAL_INTENT_NLP_WORD_COUNT_ENDPOINT: http://fano-nlp-word-count:8080
+    PORTAL_INTENT_REQUEST_TIMEOUT_MSECS: "300000"
+    PORTAL_INTENT_NLP_CHECK_TRAINING_TASK_INTERVAL_MINUTES: 2
+    PORTAL_INTENT_NLP_CHECK_CLUSTER_TASK_INTERVAL_MINUTES: 1
+    PORTAL_INTENT_NLP_PROCESS_CLUSTER_TASK_INTERVAL_MINUTES: 1
+    PORTAL_INTENT_NLP_RETRY_AUTO_RUN_INTERVAL_MINUTES: 1
+    PORTAL_INTENT_NLP_DATA_CLEANSING_LIMIT_SIZE_PER_TIME: 1000
+    PORTAL_INTENT_NLP_DATA_PARSE_LIMIT_SIZE_PER_TIME: 1000
+    PORTAL_INTENT_NLP_CLOUD_SERVER_URL: http://fano-portal-crud:8080/portal-crud
+    MINIO_DOWNLOAD_CENTER_TASK_BUCKET: chl-uat
+    PORTAL_NLP_INTENT_DOWNLOAD_CENTER_NATS_SERVER_URL: "fano-common-nats:4222"
+    PORTAL_NLP_INTENT_DOWNLOAD_CENTER_NATS_STREAM_NAME: "portal-intent-NLP"
+    NATS_NLP_ACK_WAIT_TIME_MINUTE: 60
+    NATS_NLP_MAX_REDELIVER_NUM: 5
+    PORTAL_NLP_INTENT_DOWNLOAD_CENTER_NATS_STREAM_SUBJECT_NAME: "DownloadCenter"
+    PORTAL_NLP_DOWNLOAD_CENTER_TASK_SOURCE: "NLP"
+    EXPORT_SNAPSHOT_TIME_OUT_MINUTE: 30
+    MINIO_ACCESS_KEY: admin
+    MINIO_FORCE_REGION: "false"   #Set to true if using Dell s3 storage.
+    PORTAL_RDBMS_DOMAIN: ""       #Set to support MSSQL Windows Authentication
+    SSL_ENABLE: ""                #Set to true if enable https service
+    SSL_KEY: ""                   #ssl_key file path
+    SSL_CRT: ""                   #ssl_cert file path
+    NATS_SSL_ENABLE: ""           #Set to true if enable nats https service
+    NATS_SSL_CA: ""               #nats_ssl_ca file path
+    NATS_SSL_KEY: ""              #nats_ssl_key file path
+    NATS_SSL_CRT: ""              #nats_ssl_cert file path
+  envSecret:
+    MINIO_SECRET_KEY: "oss_secretkey"
+    PORTAL_RDBMS_PWD: "rdbms_password"
+  persistence:
+    enabled: false
+    existingClaim: fano-data
+    subPath: ms-intent
+  localVolume:
+    enabled: false
+    hostPath: /opt/fano/data/chl-uat/files
+  service:
+    type: ClusterIP
+    port: 8080
+  command:
+    - '/bin/sh'
+  commandArgs:
+    - '-c'
+    - '/app/run.sh'
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2048Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+############################################################################################################################
+##    service: fano-nlp-entity                                                                                            ##
+############################################################################################################################
+fano-nlp-entity:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: fanolabs/fano-nlp-entity
+    pullPolicy: IfNotPresent
+  env:
+    TZ: "Asia/Hong_Kong"
+    LANG: "C.UTF-8"
+    PYTHAINLP_DATA_DIR: "/opt/pythainlp-data"
+    MKL_NUM_THREADS: "2"
+    ENTITY_SERVER_HOST: "0.0.0.0"
+    ENTITY_SERVER_PORT: "8080"
+    ENTITY_LOG_LEVEL: "INFO"
+    ENTITY_LOG_DIR_PATH: "/tmp/logs"
+    ENTITY_LOG_FILE_NAME: "appl.log"
+    ENTITY_ENABLE_FUZZY_SEARCH: "false"
+    ENTITY_MINIO_ENDPOINT: "fano-common-oss:9000"
+    ENTITY_MINIO_BUCKET_NAME: "chl-uat"
+    ENTITY_MAX_CACHE_CAPACITY: "20"
+    ENTITY_ENABLE_EXTRACT_PERSON_NAME: "true"
+    ENTITY_ENABLE_EXTRACT_ADDRESS: "true"
+    ENTITY_SPEECH_REPLACE_PHRASES_ENDPOINT_URL: "http://fano-speech-gateway-service:3000/speech/replace-phrases"
+    MKL_NUM_THREADS: "2"
+    ENTITY_LOG_DISPLAY_FORMAT: "json"
+    ENTITY_LOG_MAX_BYTE_SIZE: "100000000"
+    ENTITY_LOG_BACKUP_COUNT: "10"
+    ENTITY_MINIO_ACCESS_KEY: "admin"
+  envSecret:
+    ENTITY_MINIO_SECRET_KEY: "oss_secretkey"
+  command:
+    - '/bin/sh'
+  commandArgs:
+    - '-c'
+    - '/app/run.sh'
+  localVolume:
+    enabled: false
+    name: example
+    hostPath: /opt/fano/data/chl-uat/example
+    mountPath: /app/files
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2048Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  affinity: {}
+############################################################################################################################
+##    service: fano-nlp-intent                                                                                            ##
+############################################################################################################################
+fano-nlp-intent:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: fanolabs/fano-nlp-intent
+    pullPolicy: IfNotPresent
+  env:
+    TZ: "Asia/Hong_Kong"
+    LANG: "C.UTF-8"
+    PYTHAINLP_DATA_DIR: "/opt/pythainlp-data"
+    MKL_NUM_THREADS: "2"
+    INTENT_SERVER_HOST: "0.0.0.0"
+    INTENT_SERVER_PORT: "8080"
+    INTENT_LOG_LEVEL: "INFO"
+    INTENT_LOG_DIR_PATH: "/tmp/log/"
+    INTENT_LOG_FILE_NAME: "appl.log"
+    INTENT_MINIO_ENDPOINT: "fano-common-oss:9000"
+    INTENT_MINIO_BUCKET_NAME: "chl-uat"
+    INTENT_MAX_CACHE_CAPACITY: "20"
+    INTENT_CONFIDENCE_THRESHOLD: "0.3"
+    INTENT_TF_IDF_THRESHOLD: "0.25"
+    INTENT_SUPPORTED_LANGUAGE_CODES: "en,yue-Hant,zh-Hans"
+    MKL_NUM_THREADS: "2"
+    INTENT_LOCAL_MODEL_PATH_PREFIX: "/tmp"
+    INTENT_LOG_DISPLAY_FORMAT: "json"
+    INTENT_LOG_MAX_BYTE_SIZE: "100000000"
+    INTENT_LOG_BACKUP_COUNT: "10"
+    INTENT_MINIO_ACCESS_KEY: "admin"
+  envSecret:
+    INTENT_MINIO_SECRET_KEY: "oss_secretkey"
+  command:
+    - '/bin/sh'
+  commandArgs:
+    - '-c'
+    - '/app/run.sh /opt/fano-nlp-intent/main.py'
+  localVolume:
+    enabled: false
+    name: example
+    hostPath: /opt/fano/data/chl-uat/example
+    mountPath: /app/files
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 4096Mi
+    requests:
+      cpu: 100m
+      memory: 1024Mi
+  affinity: {}
+############################################################################################################################
+##    service: fano-nlp-pattern-recognition                                                                               ##
+############################################################################################################################
+fano-nlp-pattern-recognition:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: fanolabs/fano-nlp-pattern-recognition
+    pullPolicy: IfNotPresent
+  env:
+    TZ: "Asia/Hong_Kong"
+    LANG: "C.UTF-8"
+    PYTHAINLP_DATA_DIR: "/opt/pythainlp-data"
+    PATTERN_RECOGNITION_SERVER_HOST: "0.0.0.0"
+    PATTERN_RECOGNITION_SERVER_PORT: "8080"
+    PATTERN_RECOGNITION_LOG_LEVEL: "INFO"
+    PATTERN_RECOGNITION_LOG_DIR_PATH: "/tmp/logs"
+    PATTERN_RECOGNITION_LOG_FILE_NAME: "appl.log"
+    PATTERN_RECOGNITION_WINDOW_RATIO: "1.5"
+    PATTERN_RECOGNITION_TFIDF_THRESHOLD: "0.5"
+    PATTERN_RECOGNITION_NBEST: "3"
+    PATTERN_RECOGNITION_MINIO_ENDPOINT: "fano-common-oss:9000"
+    PATTERN_RECOGNITION_MINIO_BUCKET_NAME: "chl-uat"
+    PATTERN_RECOGNITION_MAX_CACHE_CAPACITY: "20"
+    PATTERN_RECOGNITION_MULTI_PROCESS_POOL_NUMBER: "3"
+    PATTERN_RECOGNITION_LOG_DISPLAY_FORMAT: "json"
+    PATTERN_RECOGNITION_LOG_MAX_BYTE_SIZE: "100000000"
+    PATTERN_RECOGNITION_LOG_BACKUP_COUNT: "10"
+    PATTERN_RECOGNITION_MINIO_ACCESS_KEY: "admin"
+  envSecret:
+    PATTERN_RECOGNITION_MINIO_SECRET_KEY: "oss_secretkey"
+  command:
+    - '/bin/sh'
+  commandArgs:
+    - '-c'
+    - '/app/run.sh'
+  localVolume:
+    enabled: false
+    name: example
+    hostPath: /opt/fano/data/chl-uat/example
+    mountPath: /app/files
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 2048Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+############################################################################################################################
+##    service: fano-nlp-word-count                                                                                        ##
+############################################################################################################################
+fano-nlp-word-count:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: fanolabs/fano-nlp-word-count
+    pullPolicy: IfNotPresent
+  env:
+    TZ: "Asia/Hong_Kong"
+    LANG: "C.UTF-8"
+    PYTHAINLP_DATA_DIR: "/opt/pythainlp-data"
+    WORD_COUNT_SERVER_HOST: "0.0.0.0"
+    WORD_COUNT_SERVER_PORT: "8080"
+    WORD_COUNT_LOG_LEVEL: "DEBUG"
+    WORD_COUNT_LOG_DIR_PATH: "/tmp/logs"
+    WORD_COUNT_LOG_FILE_NAME: "appl.log"
+    WORD_COUNT_IMPORT_BULK_LIMIT: "500"
+    WORD_COUNT_MAX_CACHE_CAPACITY: "20"
+    WORD_COUNT_MINIO_ENDPOINT: "fano-common-oss:9000"
+    WORD_COUNT_LOG_DISPLAY_FORMAT: "json"
+    WORD_COUNT_LOG_MAX_BYTE_SIZE: "100000000"
+    WORD_COUNT_LOG_BACKUP_COUNT: "10"
+    WORD_COUNT_MINIO_BUCKET_NAME: "chl-uat"
+    WORD_COUNT_MINIO_ACCESS_KEY: "admin"
+  envSecret:
+    WORD_COUNT_MINIO_SECRET_KEY: "oss_secretkey"
+  command:
+    - '/bin/sh'
+  commandArgs:
+    - '-c'
+    - '/app/run.sh'
+  localVolume:
+    enabled: false
+    name: example
+    hostPath: /opt/fano/data/chl-uat/example
+    mountPath: /app/files
+resources:
+   limits:
+     cpu: 1000m
+     memory: 1024Mi
+   requests:
+     cpu: 100m
+     memory: 128Mi
+############################################################################################################################
+##    service: fano-nlp-task                                                                              ##
+############################################################################################################################
+fano-nlp-task:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: fanolabs/fano-nlp-task
+    pullPolicy: IfNotPresent
+  env:
+    TZ: "Asia/Hong_Kong"
+    LANG: "C.UTF-8"
+    NLP_TASK_SERVER_HOST: "0.0.0.0"
+    NLP_TASK_SERVER_PORT: "8080"
+    NLP_TASK_REQUEST_TIMEOUT: "180"
+    NLP_TASK_RESPONSE_TIMEOUT: "3600"
+    NLP_TASK_REQUEST_MAX_SIZE: "500000000"
+    TRAINING_TASK_PROGRESS_TIMEOUT_INTERVAL: "3600"
+    TRAINING_TASK_LOCAL_MODEL_PATH_PREFIX: "/tmp"
+    NLP_TASK_HTTP_CLIENT_REQUEST_TIMEOUT: "3600"
+    NLP_TASK_PROGRESS_TIMEOUT_INTERVAL: "7200"
+    NLP_TASK_MINIO_ENABLE_MULTIPART_UPLOAD: "true"
+    NLP_TASK_DATABASE_RDBMS_MAX_POOL: "10"
+    NLP_TASK_DATABASE_RDBMS_MIN_POOL: "1"
+    NLP_TASK_DATABASE_RDBMS_MAX_IDLE_TIME: "60"
+    NLP_TASK_LOG_LEVEL: "INFO"
+    NLP_TASK_LOG_DIR_PATH: "./logs"
+    NLP_TASK_LOG_FILE_NAME: "appl.log"
+    NLP_TASK_MINIO_ENDPOINT: "fano-common-oss:9000"
+    NLP_TASK_MINIO_BUCKET_NAME: "chl-uat"
+    TRAINING_TASK_MINIO_SNAPSHOT_DIR: "fano-nlp-intent-training-task/snapshots/"
+    CLUSTERING_TASK_MINIO_STORAGE_DIR: "fano-nlp-sentence-clustering-task/storage/"
+    SUMMARIZATION_TASK_MINIO_SNAPSHOT_DIR: "fano-nlp-summarization-task/storage/"
+    NLP_TASK_DATABASE_TYPE: "rdbms"
+    NLP_TASK_DATABASE_RDBMS_TYPE: "mssql"
+    NLP_TASK_DATABASE_RDBMS_PORT: "1433"
+    NLP_TASK_INTENT_ENDPOINT_URL: "http://fano-nlp-intent:8080"
+    NLP_TASK_DATABASE_RDBMS_PROPERTIES: "charset=utf8mb4;"  #MSSQL connects using Windows Authentication，properties="TDS_Version=8.0"
+    NLP_TASK_LOCAL_MODEL_PATH_PREFIX: "/tmp"
+    NLP_TASK_GPU_ENDPOINT_URL: "http://fano-nlp-ml-training:8080"
+    NLP_TASK_MINIO_ACCESS_KEY: "admin"
+    ##for mysql, postgres
+    NLP_TASK_DATABASE_RDBMS_SERVER: "192.168.174.52"
+    # #for MSSQL
+    #NLP_TASK_DATABASE_RDBMS_SERVER: "192.168.174.52,1433"
+    NLP_TASK_DATABASE_RDBMS_DATABASE: "chluat"
+    NLP_TASK_DATABASE_RDBMS_UID: "chluatusr"  #MSSQL connects using Windows Authentication，uid="{domain}\{windows user}"
+    NLP_TASK_MINIO_SECURE: "false"    #When using https to connect Minio, the value is "true"
+    NLP_TASK_MINIO_CERT_CHECK: "false"  #When using https to connect to Minio, certificate verification is not used by default
+    NLP_TASK_MINIO_CONTEXTUAL_PATH: "true"  #set to true if it is a single domain ENV
+    NLP_TASK_MINIO_FORCE_REGION: "false"  #set to true if using Dell s3 storage.
+    #NLP_TASK_DATABASE_RDBMS_DRIVER: "MySQL ODBC 8.0 ANSI Driver" #MSSQL connects using Windows Authentication，driver="FreeTDS"，postgresql set to "null"
+  envSecret:
+    # File Storage
+    NLP_TASK_DATABASE_RDBMS_PWD: "rdbms_password"
+    NLP_TASK_MINIO_SECRET_KEY: "oss_secretkey"
+  command:
+    - '/bin/sh'
+  commandArgs:
+    - '-c'
+    - '/app/run.sh'
+  localVolume:
+    enabled: false
+    name: example
+    hostPath: /opt/fano/data/chl-uat/example
+    mountPath: /app/files
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+############################################################################################################################
+##    service: fano-nlp-summarise                                                                                         ##
+############################################################################################################################
+fano-nlp-summarise:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: fanolabs/fano-nlp-intent
+    pullPolicy: IfNotPresent
+  env:
+    TZ: "Asia/Hong_Kong"
+    LANG: "C.UTF-8"
+    INTENT_LOG_LEVEL: "INFO"
+    INTENT_LOG_DIR_PATH: "/var/log/"
+    INTENT_LOG_FILE_NAME: "appl.log"
+    INTENT_MINIO_ENDPOINT: "fano-common-oss:9000"
+    INTENT_MINIO_BUCKET_NAME: "chl-uat"
+    INTENT_MAX_CACHE_CAPACITY: "20"
+    INTENT_CONFIDENCE_THRESHOLD: "0.3"
+    INTENT_TF_IDF_THRESHOLD: "0.25"
+    INTENT_SUPPORTED_LANGUAGE_CODES: "en,yue-Hant,zh-Hans"
+    MKL_NUM_THREADS: "2"
+    INTENT_LOCAL_MODEL_PATH_PREFIX: "/tmp"
+    SUMMARISE_MODEL_PATH_ZH: "./models/fano-summarisation-model-v1.0.0.0_zh"
+    SUMMARISE_MODEL_PATH_EN: "./models/fano-summarisation-model-v1.1.0.0_en"
+    SUMMARISE_TASK_POLLING_INTERVAL: "60"
+    INTENT_HTTP_CLIENT_FORCE_CLOSE: "true"
+    INTENT_HTTP_CLIENT_REQUEST_TIMEOUT: "3600"
+    SUMMARISE_TASK_HOSTS: "http://fano-nlp-task:8080/nlp/summarization-task/tasks"
+    INTENT_MINIO_ACCESS_KEY: "admin"
+  envSecret:
+    # File Storage
+    INTENT_MINIO_SECRET_KEY: "oss_secretkey"
+  command:
+    - '/bin/sh'
+  commandArgs:
+    - '-c'
+    - '/app/run.sh /opt/fano-nlp-intent/summarise_main.py'
+  localVolume:
+    enabled: false
+    name: example
+    hostPath: /opt/fano/data/chl-uat/example
+    mountPath: /app/files
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 4096Mi
+    requests:
+      cpu: 100m
+      memory: 1024Mi
+  affinity: {}
+
+############################################################################################################################
+##    service: fano-nlp-ml-training                                                                                    ##
+############################################################################################################################
+fano-nlp-ml-training:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: fanolabs/fano-ms-ml
+    pullPolicy: IfNotPresent
+  env:
+    PYTHAINLP_DATA_DIR: "/opt/pythainlp-data"
+    ML_MINIO_ENDPOINT: "fano-common-oss:9000"
+    ML_MINIO_USE_SSL: "false"
+    ML_MINIO_BUCKET_NAME: "chl-uat"
+    ML_TASK_HOSTS: ""
+    ML_NLP_TASK_HOSTS: "http://fano-nlp-task:8080/nlp/intent-training-task/tasks"
+    ML_DATABASE_TENANT_ID: "nlp-ml-training"
+    ML_LOG_DISPLAY_FORMAT: "json"
+    ML_LOG_MAX_BYTE_SIZE: "100000000"
+    ML_LOG_BACKUP_COUNT: "10"
+    ML_MINIO_ACCESS_KEY: "admin"
+  command:
+    - '/bin/sh'
+  commandArgs:
+    - '-c'
+    - '/app/run.sh /opt/fano_ms_ml/training_main.py'
+  envSecret:
+    ML_MINIO_SECRET_KEY: "oss_secretkey"
+  localVolume:
+    enabled: false
+    name: example
+    hostPath: /opt/fano/data/chl-uat/example
+    mountPath: /app/files
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 8192Mi
+    requests:
+      cpu: 100m
+      memory: 2048Mi
+############################################################################################################################
+##    service: fano-nlp-ml-clustering                                                                          ##
+############################################################################################################################
+fano-nlp-ml-clustering:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: fanolabs/fano-ms-ml
+    pullPolicy: IfNotPresent
+  env:
+    PYTHAINLP_DATA_DIR: "/opt/pythainlp-data"
+    ML_MINIO_ENDPOINT: "fano-common-oss:9000"
+    ML_MINIO_USE_SSL: "false"
+    ML_MINIO_BUCKET_NAME: "chl-uat"
+    ML_TASK_HOSTS: ""
+    ML_NLP_TASK_HOSTS: "http://fano-nlp-task:8080/nlp/sentence-clustering-task/tasks"
+    ML_DATABASE_TENANT_ID: "nlp-ml-clustering"
+    ML_LOG_DISPLAY_FORMAT: "json"
+    ML_LOG_MAX_BYTE_SIZE: "100000000"
+    ML_LOG_BACKUP_COUNT: "10"
+    ML_MINIO_ACCESS_KEY: "admin"
+  envSecret:
+    ML_MINIO_SECRET_KEY: "oss_secretkey"
+  command:
+    - '/bin/sh'
+  commandArgs:
+    - '-c'
+    - '/app/run.sh /opt/fano_ms_ml/clustering_main.py'
+  localVolume:
+    enabled: false
+    name: example
+    hostPath: /opt/fano/data/chl-uat/example
+    mountPath: /app/files
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 8192Mi
+    requests:
+      cpu: 100m
+      memory: 2048Mi

@@ -1,0 +1,47 @@
+fano-callinter-web:
+  enabled: true
+  image:
+    tag: 23.06.5-v2.30.5-ubi8.8
+fano-callinter-analyze-worker:
+  enabled: true
+  image:
+    tag: 23.06.5-v1.6.3-ubi8.8
+fano-callinter-crud:
+  enabled: true
+  image:
+    tag: v2.6.6-hotfix1-ubi8.8
+fano-callinter-quality-check-worker:
+  enabled: true
+  image:
+    tag: 23.06.5-v1.6.3-ubi8.8
+fano-callinter-speech-adapter:
+  enabled: true
+  image:
+    tag: 23.06.5-v2.9.9-ubi8.8
+fano-callinter-download-worker:
+  enabled: true
+  image:
+    tag: 23.06.5-v1.6.6-ubi8.8
+fano-callinter-speech-post-processing:
+  enabled: true
+  image:
+    tag: 23.06.5-v0.2.15-ubi8.8
+fano-callinter-sanitising:
+  enabled: true
+  image:
+    tag: 23.06.5-v1.3.9-ubi8.8
+fano-callinter-convert-worker:
+  enabled: true
+  image:
+    tag: 23.06.5-v1.6.6-ubi8.8  # image same as fano-callinter-download-worker
+fano-callinter-migration:
+  enabled: true
+  crud:
+    image:
+      tag: v2.6.6-hotfix1-ubi8.8 #image same as fano-callinter-crud
+  analyzeworker:
+    image:
+      tag: 23.06.5-v1.6.3-ubi8.8
+  speechadapter:
+    image:
+      tag: 23.06.5-v2.9.9-ubi8.8

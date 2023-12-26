@@ -1,0 +1,240 @@
+global:
+  serviceAccount: "default"
+  imageRegistry: 'hub.fano.ai'
+  imagePullSecrets:
+    - fano-secret-hk
+  existingClaim: 'chl-uat'
+  nodeAffinityPreset:
+    type: ""
+    key: ""
+    values:
+      - test
+  hostAliases:
+    enabled: true
+    values:
+      - ip: "192.168.174.20"
+        hostnames:
+        - "chluat.fano.ai"
+############################################################################################################################
+##    service: fano-portal-web                                                                                            ##
+############################################################################################################################
+fano-portal-web:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: fanolabs/fano-portal-web
+    pullPolicy: IfNotPresent
+  # configmap:
+    # VUE_APP_CLOUD_PORTAL_PORT: "8080"
+    # VUE_APP_CLOUD_PORTAL_GATEWAY: "http://fano-portal-crud:8080/fano/cloud/"
+    # VUE_APP_CLOUD_PORTAL_KEYCLOAK_URL: "https://chluat.fano.ai/iam"
+    # VUE_APP_CLOUD_PORTAL_KEYCLOAK_DEFAULT_REALM: "fanolabs"
+    # VUE_APP_CLOUD_PORTAL_KEYCLOAK_PORTAL_CLIENT_ID: "Portal"
+    # VUE_APP_CLOUD_PORTAL_KEYCLOAK_TENANT_ADMIN_ROLE: "tenant-admin"
+    # VUE_APP_CLOUD_PORTAL_KEYCLOAK_SUPER_USER_ROLE: "super-user"
+    # VUE_APP_CLOUD_PORTAL_KEYCLOAK_END_USER_ROLE: "end-user"
+    # VUE_APP_CLOUD_PORTAL_OPEN_AGENT_ASSIST_PRE: "openAgentAssist"
+    # VUE_APP_CLOUD_PORTAL_CLOSE_AGENT_ASSIST_MSG: "closeAgentAssist"
+    # VUE_APP_CLOUD_PORTAL_REALM_FROM_HOST_NAME_LENGTH: "100"
+    # VUE_APP_CLOUD_PORTAL_SERVER_ID: "fano_app_portal_cloud"
+    # VUE_APP_CLOUD_PORTAL_KEYCLOAK_UPDATE_TOKEN_MIN_VALIDITY: "60"
+    # VUE_APP_CLOUD_PORTAL_MSG_DURATION: "10000"
+  env:
+    PORTAL_WEB_IS_SUPPORT_CONTEXT_PATH: true
+    PORTAL_WEB_CONTEXT_PATH_SUFFIXES: portal,datapanel,nlp,focotalk
+    PORTAL_WEB_CRUD_URL_PORTAL: https://chluat.fano.ai/portal-crud/
+    PORTAL_WEB_CRUD_URL_DATAPANEL: https://chluat.fano.ai/datapanel-crud/
+    PORTAL_WEB_CRUD_URL_NLP: https://chluat.fano.ai/nlp-crud/
+    PORTAL_WEB_CRUD_URL_FOCOTALK: https://chluat.fano.ai/focotalk-crud/
+    PORTAL_WEB_CRUD_HOST_NAME: https://chluat.fano.ai/
+  command:
+    - '/bin/sh'
+
+  commandArgs:
+    - '-c'
+    - '/app/run.sh'
+  service:
+    type: ClusterIP
+    port: 8080
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+############################################################################################################################
+##    service: fano-portal-crud                                                                                           ##
+############################################################################################################################
+fano-portal-crud:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: fanolabs/fano-portal-crud
+    pullPolicy: IfNotPresent
+  env:
+    TZ: "Asia/Hong_Kong"
+    NODE_TLS_REJECT_UNAUTHORIZED: "0"
+    NODE_OPTIONS: "--max-http-header-size=81920"
+    PORTAL_CRUD_ROUTER_PREFIX: "/portal-crud"
+    MINIO_ENDPOINT: "fano-common-oss"
+    MINIO_PORT: "9000"
+    MINIO_USE_SSL: false
+    MINIO_BUCKET: "chl-uat"
+    MINIO_EXTERNAL_HOST: "chluat.fano.ai"
+    MINIO_CONTEXTUAL_PATH: true
+    CLOUD_APP_PORT: "8080"
+    CLOUD_APP_KEYCLOAK_MASTER_REALM: "master"
+    CLOUD_APP_KEYCLOAK_TENANT_ADMIN_ROLE: "tenant-admin"
+    CLOUD_APP_KEYCLOAK_END_USER_ROLE: "end-user"
+    CLOUD_APP_KEYCLOAK_DEFAULT_REALM: "fanolabs"
+    CLOUD_APP_KEYCLOAK_ADMIN_SERVER_URL: "http://fano-portal-keycloak:8080/iam/admin/realms"
+    CLOUD_APP_KEYCLOAK_USER_SERVER_URL: "http://fano-portal-keycloak:8080/iam/realms"
+    CLOUD_APP_KEYCLOAK_ADMIN_CLIENT_ID: "admin-cli"
+    CLOUD_APP_LICENSE_CLIENT_ENDPOINT: "http://fano-common-license-client:8080"
+    PORTAL_RDMBS_CONNECTION_TYPE: "sql-login"
+    PORTAL_RDBMS_ENGINE: "mssql"
+    PORTAL_RDBMS_HOST: "192.168.174.52"
+    PORTAL_RDBMS_PORT: "1433"
+    PORTAL_RDBMS_DB: "chluat"
+    PORTAL_RDBMS_USER: "chluatusr"
+    PORTAL_RDMBS_REQUIRE_SERCURE_TRANSPORT: "false"
+    PORTAL_RDMBS_REQUIRE_ENCRYPT: "false"
+    PORTAL_RDMBS_POOL_MIN: "10"
+    PORTAL_RDMBS_POOL_MAX: "200"
+    PORTAL_RDBMS_TIMEZONE: "Asia/Hong_Kong"
+    PORTAL_RDBMS_UTC_OFFSET: "+08:00"
+    ACCESS_CONTROL_ALLOW_ORIGIN: "https://chluat.fano.ai"
+    DEFAULT_ACCESS_CONTROL_ALLOW_ORIGIN: "https://chluat.fano.ai"
+    DATAPANEL_SERVER_URL: "http://fano-datapanel-crud:8080/datapanel-crud"
+    CALLINTER_SERVER_URL: "http://fano-callinter-crud:8080"
+    INTENT_SERVER_URL: "http://fano-nlp-crud:8080/nlp-crud"
+    PORTAL_DOWNLOAD_CENTER_NATS_SERVER_URL: "fano-common-nats:4222"
+    PORTAL_DOWNLOAD_CENTER_NATS_STREAM_NAME: "portal-crud"
+    NATS_PORTAL_ACK_WAIT_TIME_MINUTE: 60
+    NATS_PORTAL_MAX_REDELIVER_NUM: 5
+    PORTAL_DOWNLOAD_CENTER_NATS_STREAM_SUBJECT_NAME: portal-crud-downloadCenter
+    PORTAL_EVENT_LOG_HOUSEKEEPING_SCHEDULER_ENABLE: true
+    MINIO_ACCESS_KEY: "admin"
+    MINIO_FORCE_REGION: "false"   #Set to true if using Dell s3 storage.
+    PORTAL_RDBMS_DOMAIN: ""       #Set to support MSSQL Windows Authentication
+    SSL_ENABLE: ""                #Set to true if enable https service
+    SSL_KEY: ""                   #ssl_key file path
+    SSL_CRT: ""                   #ssl_cert file path
+    NATS_SSL_ENABLE: ""           #Set to true if enable nats https service
+    NATS_SSL_CA: ""               #nats_ssl_ca file path
+    NATS_SSL_KEY: ""              #nats_ssl_key file path
+    NATS_SSL_CRT: ""              #nats_ssl_cert file path
+  envSecret:
+    MINIO_SECRET_KEY: "oss_secretkey"
+    PORTAL_RDBMS_PWD: "rdbms_password"
+    CLOUD_APP_KEYCLOAK_ADMIN_CLIENT_SECRET: "cloud_app_keycloak_client_secret"
+  persistence:
+    enabled: false
+    existingClaim: fano-data
+    subPath: ms-cloud
+  localVolume:
+    enabled: false
+    hostPath: /opt/fano/data/chl-uat/files
+  service:
+    type: ClusterIP
+    port: 8080
+  command:
+  - '/bin/sh'
+  commandArgs:
+    - '-c'
+    - '/app/run.sh'
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+############################################################################################################################
+##    service: fano-portal-keycloak                                                                                       ##
+############################################################################################################################
+fano-portal-keycloak:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: fanolabs/fano-portal-keycloak
+    pullPolicy: IfNotPresent
+  initData:
+    enabled: true
+    image:
+      repository: fanolabs/fano-portal-init-data
+      pullPolicy: IfNotPresent
+    env:
+      RDBMS_DEFAULT_DATASOURCE_CONN_NAME: "FANODB"
+      RDMBS_CONNECTION_TYPE: "sql-login"
+      #  RDMBS_MIGRATION_TABLE_NAME_CLOUD: "portal_keycloak_knex_migrations"
+      RDMBS_MIGRATION_TABLE_NAME_CLOUD: "portal_knex_migrations"
+      RDBMS_ENGINE: "mssql"
+      RDBMS_HOST: "192.168.174.52"
+      RDBMS_PORT: "1433"
+      RDBMS_DB: "chluat"
+      RDBMS_USER: "chluatusr"
+      # RDBMS_PWD: "b5vgNwYgs7fHM"
+      RDMBS_POOL_MIN: "10"
+      RDMBS_POOL_MAX: "500"
+      PORTAL_RDMBS_REQUIRE_SERCURE_TRANSPORT: "true"
+      QUARKUS_DATASOURCE_JDBC_FOREGROUND_VALIDATION_INTERVAL: "30"
+      QUARKUS_DATASOURCE_JDBC_MAX_LIFETIME: "2M"
+      QUARKUS_DATASOURCE_JDBC_MAX_LIFETIME: "10M"
+      QUARKUS_DATASOURCE_JDBC_VALIDATION_QUERY_SQL: "select 1"
+    envSecret:
+      RDBMS_PWD: "rdbms_password"
+  initRealm:
+    jsonFile: fanolabs-realm.json
+    # loginTheme: fanolabs_23.02.02_master
+
+  env:
+    TZ: "Asia/Hong_Kong"
+    KC_TRANSACTION_XA_ENABLED: "false"
+    KC_DB: "mssql"
+    KC_DB_URL_HOST: "192.168.174.52"
+    KC_DB_URL_PORT: "1433"
+    KC_DB_URL_DATABASE: "chluat"
+    KC_DB_USERNAME: "chluatusr"
+    KC_HOSTNAME: "chluat.fano.ai"
+    KC_HTTP_RELATIVE_PATH: /iam
+    KC_HEALTH_ENABLED: true
+    #KC_METRICS_ENABLED: true
+    KC_PROXY: "edge"
+    KC_LOG_LEVEL: "info"
+    KEYCLOAK_ADMIN: "admin"
+    QUARKUS_DATASOURCE_JDBC_ACQUISITION_TIMEOUT: "30"
+    QUARKUS_DATASOURCE_JDBC_FOREGROUND_VALIDATION_INTERVAL: "2M"
+    QUARKUS_DATASOURCE_JDBC_MAX_LIFETIME: "10M"
+    QUARKUS_DATASOURCE_JDBC_VALIDATION_QUERY_SQL: "select 1"
+    # KC_HTTPS_CERTIFICATE_FILE: "/opt/keycloak/cert/server-cert.pem"
+    # KC_HTTPS_CERTIFICATE_KEY_FILE: "/opt/keycloak/cert/server-key.pem"
+    #enable the variables "KC_DB_URL_PROPERTIES" for MSSQL connection.encrypt"false/true", trustServerCertificate "false/true", if mssql connection type is Windows, need to set  "authenticationScheme=NTLM integratedSecurity=true"
+    KC_DB_URL_PROPERTIES: ";encrypt=false;trustServerCertificate=false"
+    PROXY_ADDRESS_FORWARDING: "true"
+    KEYCLOAK_MIGRATION_ACTION: "IMPORT"
+    TZ: "Asia/Hong_Kong"
+    JAVA_OPTS: "-server -Xms2048m -Xmx4096m -XX:MetaspaceSize=256M -XX:MaxMetaspaceSize=512m -Djava.net.preferIPv4Stack=true -Djboss.modules.system.pkgs=org.jboss.byteman -Djava.awt.headless=true    --add-exports=java.base/sun.nio.ch=ALL-UNNAMED --add-exports=jdk.unsupported/sun.misc=ALL-UNNAMED --add-exports=jdk.unsupported/sun.reflect=ALL-UNNAMED"
+  envSecret:
+    KEYCLOAK_ADMIN_PASSWORD: "keycloak_admin_password"
+    KC_DB_PASSWORD: "rdbms_password"
+  command:
+   - /bin/sh
+  commandArgs:
+    - -c
+    - /app/run.sh '/iam' 'admin' 'MiFZhvgQgOnY222' 'fanolabs_23.08.03_master' 'gHlQP1dDTLWww5BtGDaO07qqEfRTZ5Jg'
+  persistence:
+    enabled: false
+    existingClaim: fano-data
+    subPath: ms-keycloak
+  localVolume:
+    enabled: false
+    hostPath: /opt/fano/data/keycloak-themes
+  resources:
+    limits:
+      cpu: 4000m
+      memory: 8192Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi

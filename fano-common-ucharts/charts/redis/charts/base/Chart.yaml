@@ -1,0 +1,18 @@
+annotations:
+  artifacthub.io/changes: |
+    - kind: changed
+      description: 'Fixed typo in persistence spec template by @astralhpi in #210'
+apiVersion: v2
+description: A Helm chart for Kubernetes
+home: https://charts.pascaliske.dev
+keywords:
+- library-chart
+maintainers:
+- email: info@pascaliske.dev
+  name: pascaliske
+  url: https://pascaliske.dev
+name: base
+sources:
+- https://github.com/pascaliske/helm-charts
+type: library
+version: 1.0.2

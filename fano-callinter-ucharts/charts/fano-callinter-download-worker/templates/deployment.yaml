@@ -1,0 +1,120 @@
+{{- $fullName := include "fanolabs.name" . -}}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "fanolabs.name" . }}
+  labels:
+{{ include "fanolabs.labels" . | indent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "fanolabs.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        #rollme: {{ randAlphaNum 8 | quote }}
+      {{- if .Values.metrics.enabled }}
+      {{- with .Values.metrics.podAnnotations }}
+         {{- toYaml . | nindent 8 }}
+      {{- end }}
+        {{- end}}
+      labels:
+        {{- include "fanolabs.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "fanolabs.serviceAccountName" . }}
+      {{- if .Values.global.hostAliases.enabled }}
+      hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.global.hostAliases.values "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      {{- include "common.imagePullSecrets" . | nindent 6 }}
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: fano
+          emptyDir: {}
+        # - name: fano-ssl
+        #   secret:
+        #     secretName: fano-cert
+      {{- range .Values.configmapReload.extraConfigmapMounts }}
+        - name: {{ .name }}
+          configMap:
+            name: {{ .configMap }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: {{ include "common.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.containerSecurityContext.enabled }}
+          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+        {{- if .Values.command }}
+          command:
+            {{- range .Values.command }}
+            - {{ . | quote }}
+            {{- end }}
+        {{- end }}
+        {{- if .Values.commandArgs }}
+          args:
+          {{- range .Values.commandArgs }}
+            - {{ . | quote }}
+          {{- end }}
+        {{- end }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+{{- range $key, $value := .Values.env }}
+            - name: "{{ $key }}"
+              value: "{{ $value }}"
+{{- end }}
+{{- range $key, $value := .Values.envSecret }}
+            - name: "{{ $key }}"
+              valueFrom:
+                secretKeyRef:
+                  name: "fano-common-secret"
+                  key: {{ $value }}
+{{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          lifecycle:
+            {{- toYaml .Values.lifecycle | nindent 12 }}
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: fano
+              mountPath: /fano
+            # - name: fano-ssl
+            #   mountPath: /code/fano_ms_callinter_download_worker/ssl
+          {{- range .Values.configmapReload.extraConfigmapMounts }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+              subPath: {{ .subPath }}
+          {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.affinity }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- else }}
+      affinity:
+        podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.podAffinityPreset "context" $) | nindent 10 }}
+        podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.podAntiAffinityPreset "context" $) | nindent 10 }}
+        nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.nodeAffinityPreset.type "key" .Values.nodeAffinityPreset.key "values" .Values.nodeAffinityPreset.values "global" .Values.global ) | nindent 10 }}
+      {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

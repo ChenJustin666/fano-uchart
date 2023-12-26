@@ -1,0 +1,78 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: appcallinterconfigs
+  labels:
+    {{- include "fanolabs.labels" . | nindent 4 }}
+data:
+  dev.config.json: |-
+    {
+      "common": {
+        "endpoint": {
+          "graphqlPrefix": "/callinter-crud/graphql"
+        }
+      },
+      "audio": {
+        "upload": {
+          "asrModelTrainDomainOptions": ["hq", "tp"],
+          "enableSeparateRecognitionPerChannelOption": true
+        },
+        "viewer": {
+          "segmentConfidenceThreshold": 0.55
+        }
+      }
+    }
+  prod.en.json: |-
+    {
+      "CUSTOM": {
+        "TEST": "TEST"
+      },
+      "COMMON": {
+        "LANG_CODE": {
+          "yue-x-auto": "Multilingual (HongKong)",
+          "yue-x-narauto": "Multilingual (HongKong-NAR)",
+          "en-x-nar": "English (NAR)",
+          "cmn-x-nar": "Mandarin (NAR)",
+          "yue-nar": "Cantonese (NAR)",
+          "vi": "Vietnamese",
+          "th": "Thai",
+          "fr": "French"
+        }
+      }
+    }
+  prod.zhhant.json: |-
+    {
+      "CUSTOM": {
+        "TEST": "測試"
+      },
+      "COMMON": {
+        "LANG_CODE": {
+          "yue-x-auto": "多語言（香港）",
+          "yue-x-narauto": "多語言（香港-NAR)",
+          "en-x-nar": "英文 (NAR)",
+          "cmn-nar": "普通話 (NAR)",
+          "yue-nar": "廣東話 (NAR)",
+          "vi": "越南話",
+          "th": "泰話",
+          "fr": "法話"
+        }
+      }
+    }
+  prod.zhhans.json: |-
+    {
+      "CUSTOM": {
+        "TEST": "测试"
+      },
+      "COMMON": {
+        "LANG_CODE": {
+          "yue-x-auto": "多语言（香港）",
+          "yue-x-narauto": "多语言(香港-NAR)",
+          "en-x-nar": "英文 (NAR)",
+          "cmn-x-nar": "普通话 (NAR)",
+          "yue-nar": "广东话 (NAR)",
+          "vi": "越南话",
+          "th": "泰话",
+          "fr": "法话"
+        }
+      }
+    }

@@ -1,0 +1,26 @@
+annotations:
+  artifacthub.io/changes: |-
+    - kind: removed
+      description: 'Remove values schema due to issues with flux variable substitution.'
+apiVersion: v2
+appVersion: 7.0.9
+dependencies:
+- name: base
+  repository: https://charts.pascaliske.dev
+  version: 1.0.2
+description: A Helm chart for Redis
+home: https://charts.pascaliske.dev/charts/redis/
+keywords:
+- redis
+maintainers:
+- email: info@pascaliske.dev
+  name: pascaliske
+  url: https://pascaliske.dev
+name: redis
+sources:
+- https://github.com/pascaliske/helm-charts
+- https://github.com/docker-library/redis
+- https://github.com/redis/redis
+- https://redis.io
+type: application
+version: 1.1.3

@@ -1,0 +1,480 @@
+global:
+  serviceAccount: "default"
+  imageRegistry: 'hub.fano.ai'
+  imagePullSecrets:
+    - fano-secret-hk
+  rdbms:
+    # type: 'postgresql'
+    # url: 'fano-common-postgresql'
+    # port: 5432
+    # database: 'fano-speech-ms-license-control'
+    type: 'mssql'
+    url: '192.168.174.52'
+    port: 1433
+    database: 'chluat'
+    auth:
+      enabled: true
+      existingSecret: 'fano-common-secret' # opaque secret key: username, password
+############################################################################################################################
+##    service: fano-license-control                                                                                       ##
+############################################################################################################################
+fano-license-control:
+  enabled: false
+  image:
+    registry: hub.fano.ai
+    repository: fanolabs/fano_ms_license_control
+    tag: v1.1.5
+  port: 8080
+
+  tls:
+    enabled: true
+    existingSecret: fano-common-tls
+
+  parameter:
+    licenseServerUrl: 'https://license-control.fano.ai/license-server'
+    jwtSecret: 'mileswen'
+    LicenseControlEnv: 'infra-testing'
+  # nodeAffinityPreset:
+  #   type: "hard"
+  #   key: "node"
+  #   values:
+  #     - test
+
+############################################################################################################################
+##    service: license-client                                                                                             ##
+############################################################################################################################
+license-client:
+  enabled: false
+  replicaCount: 1
+  image:
+    registry: 'hub.fano.ai'
+    repository: fanolabs/fano-license-client
+    pullPolicy: IfNotPresent
+  imagePullSecrets:
+    - fano-secret-hk
+  tls:
+    enabled: false
+    existingSecret: fano-common-tls
+  port: 8080
+  parameter:
+    databaseTableNamePrefix: license_control_fano_speech
+    reservedQuotaTimeoutCron: 0 */5 * * * *
+    reservedQuotaTimeout: 7d
+    runDatabaseMigration: false
+    loglevel: info
+    db:
+      type: 'mssql'
+      url: '192.168.174.52'
+      port: 1433
+      database: 'chluat'
+      rdbms_username: "chluatusr"
+      license_client_rdbms_domain: 
+      encrypt: false
+      auth:
+        existingSecret: 'fano-common-secret'
+      tls:
+        enabled: false
+        existingSecret: 'fano-common-tls'
+    redis:
+      url: 'fano-common-redis'
+      port: 6379
+      auth:
+        enabled: false
+        existingSecret: 'fano-common-secret' # opaque secret key: username, password
+      tls:
+        enabled: false
+        existingSecret: 'fano-common-tls' # certificate secret
+        certFilename: tls.crt
+        certKeyFilename: tls.key
+        certCAFilename: ca.crt
+
+  service:
+    type: 'ClusterIP'
+    port: 8080
+    targetPort: 8080
+    nodePort: '30005'
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+  # nodeAffinityPreset:
+  #   type: "hard"
+  #   key: "node"
+  #   values:
+  #     - test
+
+############################################################################################################################
+##    service: fano-common-redis                                                                                          ##
+############################################################################################################################
+redis:
+  image:
+    repository: hub.fano.ai/thirdparty/redis
+    pullPolicy: IfNotPresent
+  imagePullSecrets:
+    - fano-secret-hk
+############################################################################################################################
+##    service: fano-common-oss                                                                                            ##
+############################################################################################################################
+oss:
+  enabled: false
+  serviceAccount:
+    create: false
+    name: 'default'
+  nameOverride: 'oss'
+  args: ['server', '/data']
+  #args: ['server', '/data', '--certs-dir', '/certs']
+  image:
+    repository: 'fanolabs/fano-oss-server'
+    pullPolicy: IfNotPresent
+    pullSecrets:
+      - fano-secret-hk
+  parameter:
+    oss_access_key: admin
+  persistence:
+    enabled: true
+    existingClaim: "chl-uat"
+  volumePermissions:
+    enabled: true
+    image:
+      repository: 'fanolabs/fano-dia-init-data'
+      pullPolicy: IfNotPresent
+  extraEnv:
+    - name: OSS_SSE_KMS_ENCRYPTION
+      value: "off"
+    # - name: OSS_IDENTITY_OPENID_BASE_URL
+    #   value: https://chluat.fano.ai/iam
+    - name: OSS_IDENTITY_OPENID_REALM
+      value: fanolabs
+    - name: OSS_IDENTITY_OPENID_CLIENT_ID
+      value: oss
+    - name: OSS_IDENTITY_OPENID_POLICY_CLAIM_PREFIX
+      value: oss_
+    - name: OSS_EXTERNAL_URL
+      value: chluat.fano.ai/oss
+    - name: OSS_EXTERNAL_URL_SCHEME
+      value: https
+    - name: OSS_SERVER_PREFIX
+      value: "on"
+    - name: OSS_PORTAL_URL
+      value: https://chluat.fano.ai/app/portal
+    - name: OSS_KEY_ROTATION_ENABLED
+      value: "on"
+    - name: OSS_COMPRESS
+      value: "false"
+    - name: OSS_COMPRESS_EXTENSIONS
+      value: ".pdf,.doc"
+    - name: OSS_COMPRESS_MIMETYPES
+      value: "application/pdf"
+    - name: "OSS_SSE_ENCRYPTION_KEY"
+      value: ""
+    - name: "OSS_SSE_ENCRYPTION_KEY_FILE"
+      value: ""
+  tls:
+    enabled: false
+    existingSecret: fano-common-tls
+  existingSecret: 'minio-pass-secret'
+  hostPath: '/opt/fano/data/chl-uat/oss-data'
+  resources:
+    limits:
+      cpu: 4000m
+      memory: 8192Mi
+    requests:
+      cpu: 1000m
+      memory: 1024Mi
+  # nodeAffinityPreset:
+  #   type: "hard"
+  #   key: ""
+  #   values:
+  #     -
+  # service:
+  #   type: 'NodePort'
+  #   nodePort: '30001'
+  ingress:
+    enabled: true
+    apiVersion: ""
+    hostname: chluat.fano.ai
+    path: /oss
+############################################################################################################################
+##    service: fano-common-oss-gateway                                                                                    ##
+############################################################################################################################
+oss-gateway:
+  enabled: false
+  image:
+    repository: 'fanolabs/fano-oss-server'
+    pullSecrets:
+      - fano-secret-hk
+  gateway:
+    enabled: true
+    ## @param gateway.type Gateway type. Supported types are: `azure`, `gcs`, `nas`, `s3`
+    type: azure
+    replicaCount: 1
+    auth:
+      azure:
+        accessKey: "admin"
+        secretKey: "38sjSlz2ZsIiswu11"
+        serviceEndpoint: ""
+        storageAccountName: "fanoqa"
+        storageAccountKey: "XpL94J47org9PHiGu49oioG0Mu19Tf6g+Y2jhjp9mM9SNfpIIdVu5g32etl8E8XfWOPxKwQb77zs+AStLIBcgw=="
+        storageAccountNameExistingSecret: ""
+        storageAccountNameExistingSecretKey: ""
+        storageAccountKeyExistingSecret: ""
+        storageAccountKeyExistingSecretKey: ""
+      s3:
+        accessKeyId: "fanoqa"
+        secretAccessKey: "XpL94J47org9PHiGu49oioG0Mu19Tf6g+Y2jhjp9mM9SNfpIIdVu5g32etl8E8XfWOPxKwQb77zs+AStLIBcgw=="
+        accessKey: "admin"
+        secretKey: "38sjSlz2ZsIiswu11"
+        serviceEndpoint: "https://s3.amazonaws.com"
+      gcs:
+        accessKey: "admin"
+        secretKey: "38sjSlz2ZsIiswu11"
+        keyJSON: |
+          {
+            "type": "service_account",
+            "project_id": "fanolabs-1546081006685",
+            "private_key_id": "2d4447e3c0d73b2e09dd953e03985745bdcbc66c",
+            "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDXnSR1h1hfEWrf\n8804Vf2J6kBvUqbHDUUoTMu8FNDqp3aG9KcnDt2O5qjJUPvd5+5wBGOZxqJzK8P+\nA3Xyf6b1vWCE7W2AuLhv4ntw32GN5mWwe3XljVR0lKBIm9T9MVzNDoPkI6E2c1vO\nBZ5fQNPSc/g6fQpbNYmuXBfBdG+aBq32Q35KsbJP5AZtKMtyOteHY6q2QK2Ow9lM\njRkDlJkGDtRsuo2HSxF6QIXf7Cj6O6FWeCQbvQJveDD2oLcvNv2+ZmTKrwMqTLGy\nK/LYFR4S9ikL1oe3XRJxmnIOoSsQbORmNLMl0RpxHh5O+eHQFCYK4r/teEeLwerd\nGpK5jO+PAgMBAAECggEAXhbmDR+l8b6RC+/BU187B88glTPVMbHZxw9ULNxMmsm/\nUH883i9/gdeoOknLz3dhtqJDsJxc0bN8kMGD2/HWsxAUKY3Opkh1u+VyhrwEPz8W\niyAlP6of+8vL8kOGe4LqA1XdOlZOCIvouQv8o4aPqRwQa72bIlhHn73yY+pitSx9\nffi5Kr1pLnj3HQk7sL5dff+PSFKwm3QQc9yQLKYpSsZzMbk2iOWJAtM2yhJdmuQq\nmTKuNhJCTvZ9FOeFV45yePIq3jnFMk9iY9IgXZPhaewOikT25dZfWQucVhP7hxKS\nocszxrMPil5Ax0liw+U0+QPvwhgugDsRxopSjWr/8QKBgQD7uCFaCoGdYt6Toh0p\npEbl87dFwmYkafX2CplbpcZni/BD7NYMWudGQPeLjEFK4BMDB3BcJxutW4AmjSup\nXhlK4aG7ts03lSkriLEH3juR41YzU2KXNvM2yzJy4p04Ynsn/qKrN6DMaOd5Lc6f\nNfhy13bbvvXVUjSgc/UQcx+HGQKBgQDbR9NlLgU0ln8ArmFMjUv11Z4dSfvhUoWU\nV9Q/naS/vdkDPJDVefGccNOFgk17HZ/4skD1bkQcBSEeOguhrwf26oMDSTVhGLEV\nZl8j35x0YtlqHLZrc0nUEIHRalT6rnZqam+0060ci4y4U03ZBvBpkuyhwNsc8QXb\nQ+GRNVNI5wKBgCbbrOJeftXR/nQh8YiNIJi8/8zYDraOWPbrefMo6zDu7F8//2cW\n3V7+BnjXZPjvEGBGVLUVIHOpjWXmIxhZO2RQ4ou8039CGoHq7xE84EtMIfF4bN7V\nD8Skp5wOmaCrq0FoUKpHwx3rD9ioFp6DUWBBHMsddovAzfj7DZjFfNd5AoGAVYSa\njhA3mX3EBCj961QDttlbs8KByCtdyy/BqBm8AcdxlhCNz6OiNcfOxne97fDszZn/\nOXiKeX8KnnY2yRSw/3wQIjzv43E0xsrI+f2gT8epUPfnsNoiheD2MAzPHYDiz7e4\n3wXaspI+DDj42FYbdqEFRkQncA8ToKLFmtL4KysCgYB6Fqid9HghLWVHXaW8q5lD\n0U9kDpQJ0yBjbHGgc9If8WsPVoGQKpR7eBEQEYYOYzbQ26RUV8X9O2jlSXM4r+6s\nHI+V6b5xrn5TwGg92h8bOkvQ4ibSbkZLQT8WPfEOQGeTy+CQ4b65VlQg/BGktMrS\n0464kl2zj1RdEuaI9bTBog==\n-----END PRIVATE KEY-----\n",
+            "client_email": "fano-qa-test@fanolabs-1546081006685.iam.gserviceaccount.com",
+            "client_id": "105689792342259139262",
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+            "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/fano-qa-test%40fanolabs-1546081006685.iam.gserviceaccount.com"
+          }
+        projectID: "fanolabs-1546081006685"
+  existingSecret: 'minio-pass-secret'
+
+  ingress:
+    enabled: true
+    apiVersion: ""
+    hostname: chluat.fano.ai
+    path: /
+    annotations:
+      kubernetes.io/ingress.class: "nginx"
+
+############################################################################################################################
+##    service: fano-common-postgresql                                                                                     ##
+############################################################################################################################
+postgresql:
+  enabled: false
+  image:
+    repository: 'thirdparty/postgresql'
+  containerSecurityContext:
+    enabled: true
+    runAsUser: 0
+  persistence:
+    enabled: true
+    existingClaim: "chl-uat"
+  volumePermissions:
+    enabled: false
+    image:
+      repository: 'fanolabs/fano-dia-init-data'
+      tag: 'v2.1.3'
+  postgresqlUsername: 'postgres'
+  hostPath: '/opt/fano/data/chl-uat/postgres'
+  existingSecret: 'fano-common-secret'
+  # nodeAffinityPreset:
+  #   type: "hard"
+  #   key: ""
+  #   values:
+  #     -
+############################################################################################################################
+##    service: fano-common-mysql                                                                                          ##
+############################################################################################################################
+mysql:
+  enabled: false
+  image:
+    repository: thirdparty/mysql
+    pullPolicy: IfNotPresent
+  auth:
+    rootPassword: "Fanolabs2022"
+    database: chluat
+    username: "chluatusr"
+    password: "b5vgNwYgs7fHM"
+  initdbScripts:
+    fano_init_script.sql: |
+      GRANT USAGE ON *.* TO 'chluatusr'@'%';
+      GRANT PROCESS ON *.* TO 'chluatusr'@'%';
+  primary:
+    persistence:
+      enabled: true
+      existingClaim: "chl-uat"
+      subPath: "mysql-data"
+    resources:
+      limits:
+        cpu: 4000m
+        memory: 8192Mi
+      requests:
+        cpu: 100m
+        memory: 256Mi
+    # nodeAffinityPreset:
+    #   type: "hard"
+    #   key: "portal-prod-mysql"
+    #   values:
+    #     - portal-prod-mysql
+    hostPath: /opt/fano/data/chl-uat/mysql
+############################################################################################################################
+##    service: fano-common-nats                                                                                           ##
+############################################################################################################################
+nats:
+  enabled: false
+  imagePullSecrets:
+  - name: "fano-secret-hk"
+  nats:
+    image:
+      repository: fanolabs/fano-common-nats
+    pullPolicy: IfNotPresent
+    resources:
+      limits:
+        cpu: 4000m
+        memory: 8192Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    jetstream:
+      enabled: true
+      memStorage:
+        enabled: true
+        size: 4Gi
+      fileStorage:
+        enabled: false
+        existingClaim: "chl-uat"
+        subpath: nats-data
+        size: 4Gi
+      hostPath: '/opt/fano/data/chl-uat/nats-data'
+  exporter:
+    enabled: false
+    image:
+      repository: thirdparty/prometheus-nats-exporter
+      tag: 0.9.0
+  reloader:
+    enabled: false
+    image:
+      repository: thirdparty/nats-server-config-reloader
+      tag: 0.6.2
+    pullPolicy: IfNotPresent
+  natsbox:
+    enabled: false
+    image:
+      repository: thirdparty/nats-box
+      tag: 0.7.0
+    pullPolicy: IfNotPresent
+
+# license-control-db-init & offline-license-import
+# InitJob:
+#   licenseControlDB:
+#     enabled: false
+#   offlineLincenseImport:
+#     enabled: false
+#     jsonFile: "infra-testing-license.json"
+
+# Secrets
+Secret:
+  enabled: true
+  oss_secretkey: 38sjSlz2ZsIiswu11
+  rdbms_password: b5vgNwYgs7fHM
+  keycloak_admin_password: MiFZhvgQgOnY222
+  cloud_app_keycloak_client_secret: "gHlQP1dDTLWww5BtGDaO07qqEfRTZ5Jg"
+# DBSecret:
+#   enabled: false
+#   username: 'chluatusr'
+#   password: 'b5vgNwYgs7fHM'
+
+# PGSecret:
+#   enabled: false
+#   username: postgres
+#   password: postgres
+
+# minioPassSecret:
+#   enabled: false
+#   accesskey: 'admin'
+#   secretkey: '38sjSlz2ZsIiswu11'
+
+# smtpSecret:
+#   enabled: false
+#   username: 'noreply@test.fano.ai'
+#   password: 'xxxxxxxx'
+
+tlsCert:
+  enabled: false
+
+fanoSecretHK:
+  enabled: true
+
+fanoCert:
+  enabled: false
+
+createServiceAccount:
+  enabled: false
+
+############################################################################################################################
+##    service: fano-db-backup                                                                                          ##
+############################################################################################################################
+db-backup:
+  enabled: false
+  jobs:
+    - name: db-backup
+      image:
+        repository: hub.fano.ai/fanolabs/db-backup
+        tag: v0.1.3
+        imagepullPolicy: IfNotPresent
+        imagePullSecrets:
+          - fano-secret-hk
+      # optional env vars
+      env:
+        MINIO_HOST: "fano-common-oss:9000"
+        BUCKET_NAME: "db-backup"
+        MYSQL_HOST: "192.168.174.52"
+        MYSQL_USER: "chluatusr"
+        MYSQL_DATABASES: "chluat"
+        MYSQL_IGNORE_TABLE:  "test1|test2"
+        USE_MINIO: "True"
+        BACKUP_MYSQL: "True"
+        BACKUP_MONGODB: "false"
+        MONGO_SSL: "false"
+        BACKUP_POSTGRES: "false"
+        PG_HOST: "192.168.174.52"
+        PG_USER: "chluatusr"
+        SCHEDULER_TIME: "52 16 * * *"
+        DEPLOY_MODE: "k8s"
+        MINIO_HOUSEKEEPING: "True"
+        MYSQL_HOUSEKEEPING_DAY: "10"
+        POSTGRES_HOUSEKEEPING_DAY: "10"
+        MONGODB_HOUSEKEEPING_DAY: "10"
+      envSecret:
+        PG_PASS: "b5vgNwYgs7fHM"
+        MONGO_URI: "mongodb://root:password@mongodb-0.mongodb-headless.lucas-testing.svc.cluster.local:27017/?tls=false&connectTimeoutMS=30000&authSource=admin&retryWrites=true&w=majority"
+        MYSQL_PASS: "b5vgNwYgs7fHM"
+        MINIO_ACCESS_KEY: "admin"
+        MINIO_SECRET_KEY: "38sjSlz2ZsIiswu11"
+      schedule: "00 01 * * *"
+      command: ["/bin/sh"]
+      args:
+        - "-c"
+        - "python /opt/fano/bin/db-backup.py"
+      resources:
+        limits:
+          cpu: 2000m
+          memory: 2000Mi
+        requests:
+          cpu: 50m
+          memory: 256Mi
+      failedJobsHistoryLimit: 1
+      successfulJobsHistoryLimit: 3
+      concurrencyPolicy: Forbid
+      restartPolicy: Never
+      volumes:
+      - name: dbbackup
+        hostPath:
+          path: /opt/fano/data/dbbackup/chl-uat
+          type: DirectoryOrCreate
+      volumeMounts:
+      - name: dbbackup
+        mountPath: /opt/fano/data/dbbackup/chl-uat
+      tolerations:
+      - effect: NoSchedule
+        operator: Exists

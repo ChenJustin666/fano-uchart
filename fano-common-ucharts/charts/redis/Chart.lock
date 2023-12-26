@@ -1,0 +1,6 @@
+dependencies:
+- name: base
+  repository: https://charts.pascaliske.dev
+  version: 1.0.2
+digest: sha256:3f003145f43dfd3e5609b58919c0cddd949438915b6ef0186867432cc6eeb049
+generated: "2023-03-12T20:31:02.500985696Z"

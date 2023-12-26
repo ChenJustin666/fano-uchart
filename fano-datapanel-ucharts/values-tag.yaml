@@ -1,0 +1,13 @@
+fano-datapanel-crud:
+  enabled: true
+  image:
+    tag: 23.06.5-v2.4.9-ubi8.8
+fano-datapanel-job:
+  enabled: true
+  initData:
+    image:
+      tag: 23.06.5-v23.10.03-ubi8.8
+    shellImage:
+      tag: 23.06.5-v2.1.0.0-alpha-ubi8.8
+  image:
+    tag: 23.06.5-v2.4.9-ubi8.8

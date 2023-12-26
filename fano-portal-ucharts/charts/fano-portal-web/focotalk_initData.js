@@ -1,0 +1,20 @@
+{
+    "keycloakUrl": "https://chluat.fano.ai/iam",
+    "keycloakDefaultRealm": "fanolabs",
+    "keycloakPortalClientId": "TTS",
+    "keycloakCloudPortalClientId": "Portal",
+    "realmFromHostNameLength": 100,
+    "portalUrl": "chluat.fano.ai/app/portal",
+    "portalCrudPrefixPath": "/portal-crud",
+    "ttsServerId": "fano_app_portal_tts",
+    "keycloakUpdateTokenMinValidity": 60,
+    "msgDuration": 10000,
+    "inputTextLimitLength": 500,
+    "englishInputTextLimitLength": 1000,
+    "settingReplaceMaxLength": 100,
+    "settingToMaxLength": 100,
+    "uploadFileMaxCount": 20,
+    "uploadContentMaxLength": 1000,
+    "uploadResultRefreshInterval": 5000,
+    "tenantAdminRole": "tenant-admin"
+}

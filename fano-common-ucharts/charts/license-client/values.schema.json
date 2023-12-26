@@ -1,0 +1,63 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "required": ["parameter", "service"],
+    "properties": {
+        "image": {
+            "type": "object",
+            "properties": {
+                "registry": {
+                    "type": "string"
+                },
+                "repository": {
+                    "type": "string"
+                },
+                "tag": {
+                    "type": "string"
+                }
+            }
+        },
+        "service": {
+            "type": "object",
+            "properties": {
+                "port": {
+                    "type": "number"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": ["ClusterIP", "LoadBalancer", "NodePort"]
+                }
+            }
+        },
+        "port": {
+            "type": "integer",
+            "default": 8080,
+            "minimum": 8080
+        },
+        "parameter": {
+            "type": "object",
+            "required": ["db"],
+            "properties": {
+                "db": {
+                    "type": "object",
+                    "required": ["type", "url", "port", "database"],
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "enum": ["mssql", "mysql", "oracle", "postgres"]
+                        },
+                        "url": {
+                            "type": "string"
+                        },
+                        "port": {
+                            "type": "number"
+                        },
+                        "database": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    }
+ }
+ 

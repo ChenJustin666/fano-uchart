@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    service: {{ .Release.Name }}-license-control
+  name: {{ .Release.Name }}-license-control
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: {{ .Release.Name }}-license-control
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        service: {{ .Release.Name }}-license-control
+    spec:
+{{- include "common.images.pullSecrets" (dict "images" (list .Values.image) "global" .Values.global) | indent 6 }}
+      initContainers:
+{{ include "speech.wait-rdbms-dns-init-container" (dict "rdbmsRoot" .Values.rdbms "global" .Values.global) | indent 8 }}
+      containers:
+        - command: ['/code/fano-ms-license-control']
+          env:
+            - name: ENVIRONMENT
+              value: "production"
+            - name: LICENSE_CONTROL_ENVIRONMENT_NAME
+              value: {{ .Values.parameter.LicenseControlEnv }}
+            - name: LICENSE_CONTROL_SERVER_PORT
+              value: {{ .Values.port | quote }}
+            - name: LICENSE_CONTROL_NUM_OF_INSTANCE
+              value: "1"
+            {{- if .Values.tls.enabled }}
+            - name: LICENSE_CONTROL_SERVER_SSL_CERT
+              value: "/ssl/tls.crt"
+            - name: LICENSE_CONTROL_SERVER_SSL_KEY
+              value: "/ssl/tls.key"
+            {{- end }}
+            - name: LICENSE_CONTROL_LOG_LEVEL
+              value: "INFO"
+            - name: LICENSE_CONTROL_LICENSE_SERVER_URL
+              value: {{ .Values.parameter.licenseServerUrl | quote }}
+            - name: LICENSE_CONTROL_DATABASE_TENANT_ID
+              value: "fano-speech"
+            - name: LICENSE_CONTROL_DATABASE_NAMESPACE
+              value: "ms-license-control"
+            - name: LICENSE_CONTROL_APP_SCOPE
+              value: "fano-speech"
+            - name: LICENSE_CONTROL_FETCH_ENV_LICENSE_SETTING_INTERVAL
+              value: "0 */1 * * * *"
+            - name: LICENSE_CONTROL_JWT_SECRET
+              value: {{ .Values.parameter.jwtSecret }}
+{{- include "speech.rdbms-arg" ( dict "rdbmsRoot" .Values.rdbms "global" .Values.global ) | indent 12 }}
+          image: {{ template "speech.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          name: {{ .Release.Name }}-license-control
+          resources: {}
+          volumeMounts:
+          {{- if .Values.tls.enabled }}
+          - mountPath: /ssl
+            name: speech-tls
+            readOnly: true
+          {{ end }}
+          ports:
+            - containerPort: {{ .Values.port }}
+      restartPolicy: Always
+      volumes:
+      {{- if .Values.tls.enabled }}
+      - name: speech-tls
+        secret:
+          secretName: {{ .Values.tls.existingSecret }}
+      {{ end }}
+      affinity:
+        podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.podAffinityPreset "context" $) | nindent 10 }}
+        podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.podAntiAffinityPreset "context" $) | nindent 10 }}
+        nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.nodeAffinityPreset.type "key" .Values.nodeAffinityPreset.key "values" .Values.nodeAffinityPreset.values "global" .Values.global ) | nindent 10 }}

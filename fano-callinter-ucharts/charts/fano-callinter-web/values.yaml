@@ -1,0 +1,149 @@
+# Default values for fano-app-callinter.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: hub.fano.ai/fanolabs/fano-app-callinter
+  #tag: v0.27.6
+  pullPolicy: IfNotPresent
+
+imagePullSecrets:
+   - fano-secret
+nameOverride: ""
+fullnameOverride: ""
+
+#env:
+#envSecret:
+
+localVolume:
+  enabled: false
+  extraVolumeMounts: []
+  extraConfigmapMounts: []
+
+buildService: false
+
+metrics:
+  enabled: false
+  podAnnotations:
+    prometheus.io/port: "8080"
+    prometheus.io/scrape: "true"
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/auth-keepalive: "75"
+    nginx.ingress.kubernetes.io/client-body-buffer-size: 500m
+    nginx.ingress.kubernetes.io/client-header-buffer-size: 10m
+    nginx.ingress.kubernetes.io/large-client-header-buffers: 4 10240k
+    nginx.ingress.kubernetes.io/proxy-body-size: 1024m
+    nginx.ingress.kubernetes.io/proxy-buffer: 32 32k
+    nginx.ingress.kubernetes.io/proxy-buffer-size: 5m   
+    nginx.ingress.kubernetes.io/proxy-buffering: "on" 
+    nginx.ingress.kubernetes.io/proxy-buffers-number: "16"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "1800"
+    nginx.ingress.kubernetes.io/proxy-max-temp-file-size: 1024m
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "1800"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "1800"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "false"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/auth-snippet: |
+      proxy_set_header Host $host;
+  hosts:
+    - host: chluat.fano.ai
+      paths:
+      - /app/callinter
+
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+lifecycle:
+    postStart:
+      exec:
+        command: ["/bin/sh", "-c", "echo postStart handler"]
+    preStop:
+      exec:
+        command: ["/bin/sh","-c","sleep 15"]
+
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: 8080
+  initialDelaySeconds: 30
+  timeoutSeconds: 60
+  periodSeconds: 10
+  successThreshold: 1
+  failureThreshold: 3
+readinessProbe:
+  httpGet:
+    path: /healthz
+    port: 8080
+  initialDelaySeconds: 30
+  timeoutSeconds: 60
+  periodSeconds: 10
+  successThreshold: 1
+  failureThreshold: 3
+
+resources:
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+   limits:
+#     cpu: 100m
+     memory: 2000Mi
+   requests:
+#     cpu: 100m
+     memory: 100Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+## @param podAffinityPreset Pod affinity preset. Ignored if `affinity` is set. Allowed values: `soft` or `hard`
+## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+##
+podAffinityPreset: ""
+## @param podAntiAffinityPreset Pod anti-affinity preset. Ignored if `affinity` is set. Allowed values: `soft` or `hard`
+## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+##
+podAntiAffinityPreset: soft
+## Node affinity preset
+## ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#node-affinity
+##
+nodeAffinityPreset:
+  ## @param nodeAffinityPreset.type Node affinity preset type. Ignored if `affinity` is set. Allowed values: `soft` or `hard`
+  ##
+  type: ""
+  ## @param nodeAffinityPreset.key Node label key to match. Ignored if `affinity` is set.
+  ## E.g.
+  ## key: "kubernetes.io/e2e-az-name"
+  ##
+  key: ""
+  ## @param nodeAffinityPreset.values Node label values to match. Ignored if `affinity` is set.
+  ## E.g.
+  ## values:
+  ##   - e2e-az1
+  ##   - e2e-az2
+  ##
+  values: {}
+  
+podSecurityContext:
+  enabled: true
+  fsGroup: 1001
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  enabled: true
+  runAsUser: 1001
+  runAsNonRoot: true
