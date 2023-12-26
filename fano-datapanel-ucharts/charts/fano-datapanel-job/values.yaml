@@ -36,11 +36,11 @@ persistence:
 
 localVolume:
   enabled: false
-  hostPath: /opt/fano/data/chl-uat/files
+  hostPath: /opt/fano/data/hkpf-netwatch-uat/files
 
 serviceAccount:
   # Specifies whether a service account should be created
-  create: false
+  create: true
   # Annotations to add to the service account
   annotations: {}
   # The name of the service account to use.

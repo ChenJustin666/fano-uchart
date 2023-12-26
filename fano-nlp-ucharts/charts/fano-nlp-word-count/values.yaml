@@ -52,7 +52,7 @@ ingress:
     nginx.ingress.kubernetes.io/ssl-passthrough: "false"
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
   hosts:
-    - host: chluat.fano.ai
+    - host: netwatch-uat.fano.ai
       paths:
       - /nlp/word-count
 
@@ -75,11 +75,11 @@ autoscaling:
 
 localVolume:
   enabled: false
-  hostPath: /opt/fano/data/chl-uat/files
+  hostPath: /opt/fano/data/hkpf-netwatch-uat/files
 
 serviceAccount:
   # Specifies whether a service account should be created
-  create: false
+  create: true
   # Annotations to add to the service account
   annotations: {}
   # The name of the service account to use.

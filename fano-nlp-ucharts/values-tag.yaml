@@ -1,36 +1,40 @@
+fano-nlp-web:
+  enabled: true
+  image:
+    tag: 23.06.4-v1.18.5-ubi8.8
 fano-nlp-crud:
   enabled: true
   image:
-    tag: 23.06.5-v1.14.12-ubi8.8
+    tag: 23.06.4-v1.14.11-ubi8.8
 fano-nlp-entity:
   enabled: true
   image:
-    tag: 23.06.5-v2.7.5-ubi8.8
+    tag: 23.06.4-v2.7.5-ubi8.8
 fano-nlp-intent:
   enabled: true
   image:
-    tag: 23.06.5-v1.17.7-ubi8.8
+    tag: 23.06.4-v1.17.6-ubi8.8
 fano-nlp-pattern-recognition:
   enabled: true
   image:
-    tag: 23.06.5-v1.19.0-ubi8.8
+    tag: 23.06.4-v1.19.0-ubi8.8
 fano-nlp-word-count:
   enabled: true
   image:
-    tag: 23.06.5-v1.18.0-ubi8.8
+    tag: 23.06.4-v1.18.0-ubi8.8
 fano-nlp-task:
   enabled: true
   image:
-    tag: 23.06.5-v1.2.6-ubi8.8
+    tag: 23.06.4-v1.2.6-ubi8.8
 fano-nlp-summarise:
   enabled: true
   image:
-    tag: 23.06.5-v1.17.7-ubi8.8  ##image same as fano-nlp-intent.
+    tag: 23.06.4-v1.17.6-ubi8.8  ##image same as fano-nlp-intent.
 fano-nlp-ml-training:
   enabled: false
   image:
-    tag: 23.06.5-v8.16.0-ubi8.8
+    tag: 23.06.4-v8.16.0-ubi8.8
 fano-nlp-ml-clustering:
   enabled: false
   image:
-    tag: 23.06.5-v8.16.0-ubi8.8
+    tag: 23.06.4-v8.16.0-ubi8.8

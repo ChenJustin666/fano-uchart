@@ -535,7 +535,7 @@ networkPolicy:
   ##
   allowExternal: true
 
-hostPath: '/opt/fano/data/chl-uat/speech-v2/ossdata'
+hostPath: '/opt/fano/data/hkpf-netwatch-uat/speech-v2/ossdata'
 ## @section Persistence parameters
 
 ## Enable persistence using Persistent Volume Claims

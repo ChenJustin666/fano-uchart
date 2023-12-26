@@ -1,1 +1,1 @@
-helm upgrade --install -f values-tag.yaml fano-datapanel . -n chl-uat
+helm upgrade --install -f values-tag.yaml fano-datapanel . -n hkpf-netwatch-uat

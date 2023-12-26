@@ -24,7 +24,7 @@ metrics:
 
 localVolume:
   enabled: false
-  hostPath: /opt/fano/data/chl-uat/model
+  hostPath: /opt/fano/data/hkpf-netwatch-uat/model
 
 persistence:
     enabled: false
@@ -58,7 +58,7 @@ ingress:
     nginx.ingress.kubernetes.io/ssl-passthrough: "false"
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
   hosts:
-    - host: chluat.fano.ai
+    - host: netwatch-uat.fano.ai
       paths:
       - /speech-post-processing
 

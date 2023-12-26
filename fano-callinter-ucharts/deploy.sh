@@ -1,1 +1,1 @@
-helm upgrade --install -f values-tag.yaml fano-callinter . -n chl-uat
+helm upgrade --install -f values-tag.yaml fano-callinter . -n hkpf-netwatch-uat

@@ -15,7 +15,6 @@
     "requiredCredentials": [
       "password"
     ],
-    "passwordPolicy": "forceExpiredPasswordChange(365) and passwordHistory(5) and length(8) and notEmail(undefined) and notUsername(undefined) and specialChars(1) and lowerCase(2) and upperCase(2) and maxLength(64)",
     "loginTheme": "fanolabs_23.04.08",
     "adminTheme": "fanolabs_23.04.08",
     "accountTheme": "keycloak",
@@ -1656,13 +1655,13 @@
         "name": "tts.title",
         "description": "tts.description",
         "enabled": false,
-        "adminUrl": "https://chluat.fano.ai/app/focotalk/",
-        "baseUrl": "https://chluat.fano.ai/app/focotalk/",
+        "adminUrl": "https://netwatch-uat.fano.ai/app/focotalk/",
+        "baseUrl": "https://netwatch-uat.fano.ai/app/focotalk/",
         "webOrigins": [
           "*"
         ],
         "redirectUris": [
-          "https://chluat.fano.ai/app/focotalk/*"
+          "https://netwatch-uat.fano.ai/app/focotalk/*"
         ],
         "publicClient": true,
         "protocolMappers": [
@@ -1712,13 +1711,13 @@
         "name": "stt.title",
         "description": "stt.description",
         "enabled": false,
-        "adminUrl": "https://chluat.fano.ai/app/demo/stt/",
-        "baseUrl": "https://chluat.fano.ai/app/demo/stt/",
+        "adminUrl": "https://netwatch-uat.fano.ai/app/demo/stt/",
+        "baseUrl": "https://netwatch-uat.fano.ai/app/demo/stt/",
         "webOrigins": [
           "*"
         ],
         "redirectUris": [
-          "https://chluat.fano.ai/app/demo/stt/*"
+          "https://netwatch-uat.fano.ai/app/demo/stt/*"
         ],
         "publicClient": true,
         "protocolMappers": [
@@ -1767,13 +1766,13 @@
         "name": "voiceprint.title",
         "description": "voiceprint.description",
         "enabled": false,
-        "adminUrl": "https://chluat.fano.ai/app/demo/voiceprint/",
-        "baseUrl": "https://chluat.fano.ai/app/demo/voiceprint/",
+        "adminUrl": "https://netwatch-uat.fano.ai/app/demo/voiceprint/",
+        "baseUrl": "https://netwatch-uat.fano.ai/app/demo/voiceprint/",
         "webOrigins": [
           "*"
         ],
         "redirectUris": [
-          "https://chluat.fano.ai/app/demo/voiceprint/*"
+          "https://netwatch-uat.fano.ai/app/demo/voiceprint/*"
         ],
         "publicClient": true,
         "protocolMappers": [
@@ -1821,13 +1820,13 @@
       {
         "clientId": "Portal",
         "enabled": true,
-        "adminUrl": "https://chluat.fano.ai/app/portal/",
-        "baseUrl": "https://chluat.fano.ai/app/portal/",
+        "adminUrl": "https://netwatch-uat.fano.ai/app/portal/",
+        "baseUrl": "https://netwatch-uat.fano.ai/app/portal/",
         "webOrigins": [
           "*"
         ],
         "redirectUris": [
-          "https://chluat.fano.ai/app/portal/*"
+          "https://netwatch-uat.fano.ai/app/portal/*"
         ],
         "publicClient": true,
         "directAccessGrantsEnabled": true,
@@ -1878,13 +1877,13 @@
         "name": "intent.title",
         "description": "intent.description",
         "enabled": true,
-        "adminUrl": "https://chluat.fano.ai/app/nlp/",
-        "baseUrl": "https://chluat.fano.ai/app/nlp/",
+        "adminUrl": "https://netwatch-uat.fano.ai/app/nlp/",
+        "baseUrl": "https://netwatch-uat.fano.ai/app/nlp/",
         "webOrigins": [
           "*"
         ],
         "redirectUris": [
-          "https://chluat.fano.ai/app/nlp/*"
+          "https://netwatch-uat.fano.ai/app/nlp/*"
         ],
         "publicClient": true,
         "protocolMappers": [
@@ -1933,13 +1932,13 @@
         "name": "datapanel.title",
         "description": "datapanel.description",
         "enabled": true,
-        "adminUrl": "https://chluat.fano.ai/app/datapanel/",
-        "baseUrl": "https://chluat.fano.ai/app/datapanel/",
+        "adminUrl": "https://netwatch-uat.fano.ai/app/datapanel/",
+        "baseUrl": "https://netwatch-uat.fano.ai/app/datapanel/",
         "webOrigins": [
           "*"
         ],
         "redirectUris": [
-          "https://chluat.fano.ai/app/datapanel/*"
+          "https://netwatch-uat.fano.ai/app/datapanel/*"
         ],
         "publicClient": true,
         "protocolMappers": [
@@ -1988,13 +1987,13 @@
         "name": "navinter.title",
         "description": "navinter.description",
         "enabled": false,
-        "adminUrl": "https://chluat.fano.ai/app/navinter/",
-        "baseUrl": "https://chluat.fano.ai/app/navinter/",
+        "adminUrl": "https://netwatch-uat.fano.ai/app/navinter/",
+        "baseUrl": "https://netwatch-uat.fano.ai/app/navinter/",
         "webOrigins": [
           "*"
         ],
         "redirectUris": [
-          "https://chluat.fano.ai/app/navinter/*"
+          "https://netwatch-uat.fano.ai/app/navinter/*"
         ],
         "publicClient": true,
         "protocolMappers": [
@@ -2043,13 +2042,13 @@
         "name": "callinter.title",
         "description": "callinter.description",
         "enabled": true,
-        "adminUrl": "https://chluat.fano.ai/app/callinter/",
-        "baseUrl": "https://chluat.fano.ai/app/callinter/",
+        "adminUrl": "https://netwatch-uat.fano.ai/app/callinter/",
+        "baseUrl": "https://netwatch-uat.fano.ai/app/callinter/",
         "webOrigins": [
           "*"
         ],
         "redirectUris": [
-          "https://chluat.fano.ai/app/callinter/*"
+          "https://netwatch-uat.fano.ai/app/callinter/*"
         ],
         "directAccessGrantsEnabled": true,
         "publicClient": true,

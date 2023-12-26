@@ -24,38 +24,22 @@ env: {}
 envSecret: {}
 localVolume:
   enabled: false
-  hostPath: /opt/fano/data/chl-uat/files
+  hostPath: /opt/fano/data/hkpf-netwatch-uat/files
 
 configmapReload:
   extraConfigmapMounts:
-    # - name: nginxconfig
-    #   mountPath: /etc/nginx/conf.d/default.conf
-    #   subPath: default.conf
-    #   configMap: appcloudconfig
-    # - name: configjs
-    #   mountPath: /usr/share/nginx/html/app/portal/config.js
-    #   subPath: config.js
-    #   configMap: appcloudconfig
-    - name: portalinitdata
-      mountPath: /tmp/portalInitData.js
-      subPath: portalInitData.js
-      configMap: appportalconfig
-    - name: datapanelinitdata
-      mountPath: /tmp/datapanelInitData.js
-      subPath: datapanelInitData.js
-      configMap: appportalconfig
-    - name: nlpinitdata
-      mountPath: /tmp/nlpInitData.js
-      subPath: nlpInitData.js
-      configMap: appportalconfig
-    - name: focotalkinitdata
-      mountPath: /tmp/focotalkInitData.js
-      subPath: focotalkInitData.js
-      configMap: appportalconfig
+    - name: nginxconfig
+      mountPath: /etc/nginx/conf.d/default.conf
+      subPath: default.conf
+      configMap: appcloudconfig
+    - name: configjs
+      mountPath: /usr/share/nginx/html/app/portal/config.js
+      subPath: config.js
+      configMap: appcloudconfig
 
 serviceAccount:
   # Specifies whether a service account should be created
-  create: false
+  create: true
   # Annotations to add to the service account
   annotations: {}
   # The name of the service account to use.
@@ -98,11 +82,10 @@ ingress:
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/ssl-passthrough: "false"
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
   hosts:
-    - host: chluat.fano.ai
+    - host: netwatch-uat.fano.ai
       paths:
-      - /
+      - /app/portal
 
   tls: []
   #  - secretName: chart-example-tls

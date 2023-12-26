@@ -28,9 +28,9 @@ spec:
       volumes:
       - name: tmp
         emptyDir: {}
-      - name: log
+      - name: nginx-cache
         emptyDir: {}
-      - name: fano
+      - name: run
         emptyDir: {}
     {{- range .Values.configmapReload.extraConfigmapMounts }}
       - name: {{ .name }}
@@ -79,10 +79,10 @@ spec:
           volumeMounts:
             - name: tmp
               mountPath: /tmp
-            - name: log
-              mountPath: /var/log
-            - name: fano
-              mountPath: /fano
+            - name: nginx-cache
+              mountPath: /var/cache/nginx
+            - name: run
+              mountPath: /var/run
           {{- range .Values.configmapReload.extraConfigmapMounts }}
             - name: {{ .name }}
               mountPath: {{ .mountPath }}

@@ -1,9 +1,8 @@
 global:
-  serviceAccount: "default"
   imageRegistry: 'hub.fano.ai'
   imagePullSecrets:
     - fano-secret-hk
-  existingClaim: 'chl-uat'
+  existingClaim: 'hkpf-netwatch-uat'
   nodeAffinityPreset:
     type: ""
     key: ""
@@ -14,8 +13,51 @@ global:
     values:
       - ip: "192.168.174.20"
         hostnames:
-        - "chluat.fano.ai"
-        
+        - "netwatch-uat.fano.ai"
+
+############################################################################################################################
+##    service: fano-datapanel-web                                                                                         ##
+############################################################################################################################
+fano-datapanel-web:
+  enabled: true
+  replicaCount: 1
+
+  image:
+    repository: fanolabs/fano-datapanel-web
+    pullPolicy: IfNotPresent
+  configmap:
+    VUE_APP_DATAPANEL_PORTAL_KEYCLOAK_URL: "https://netwatch-uat.fano.ai/iam"
+    VUE_APP_DATAPANEL_PORTAL_KEYCLOAK_DEFAULT_REALM: "fanolabs"
+    VUE_APP_DATAPANEL_PORTAL_KEYCLOAK_PORTAL_CLIENT_ID: "DataPanel"
+    VUE_APP_DATAPANEL_PORTAL_KEYCLOAK_UPDATETOKEN_MINVALIDITY: "60"
+    VUE_APP_DATAPANEL_PORTAL_REALM_FROM_HOST_NAME_LENGTH: "100"
+    VUE_APP_DATAPANEL_PORTAL_HOST_URL: "http://fano-datapanel-crud:8080/"
+    VUE_APP_CLOUD_PORTAL_HOST_URL: "http://fano-portal-crud:8080/"
+    VUE_APP_PORTAL_URL: "netwatch-uat.fano.ai/app/portal"
+    VUE_APP_DATAPANEL_PORTAL_SERVER_ID: "fano_app_portal_datapanel"
+    VUE_APP_DATAPANEL_PORTAL_KEYCLOAK_UPDATE_TOKEN_MIN_VALIDITY: "60"
+    VUE_APP_DATAPANEL_PORTAL_MSG_DURATION: "10000"
+    VUE_APP_DATAPANEL_PORTAL_DISABLE_NODE_CLICK_DURATION: "2000"
+    VUE_APP_DATAPANEL_PORTAL_MAX_ERROR_MSG_LENGTH: "20"
+    PORTAL_SERVER_URL: "netwatch-uat.fano.ai"
+  service:
+    type: ClusterIP
+    port: 8080
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+
+
 ############################################################################################################################
 ##    service: fano-datapanel-crud                                                                                        ##
 ############################################################################################################################
@@ -29,17 +71,16 @@ fano-datapanel-crud:
     TZ: "Asia/Hong_Kong"
     NODE_TLS_REJECT_UNAUTHORIZED: "0"
     NODE_OPTIONS: "--max-http-header-size=81920"
-    DATAPANEL_CRUD_ROUTER_PREFIX: "/datapanel-crud"
     MINIO_ENDPOINT: "fano-common-oss"
     MINIO_PORT: "9000"
-    MINIO_BUCKET: "chl-uat"
+    MINIO_BUCKET: "hkpf-netwatch-uat"
     PORTAL_RDBMS_DEFAULT_DATASOURCE_CONN_NAME: "FANODB"
     PORTAL_RDMBS_CONNECTION_TYPE: "sql-login"
-    PORTAL_RDBMS_ENGINE: "mssql"
-    PORTAL_RDBMS_HOST: "192.168.174.52"
-    PORTAL_RDBMS_PORT: "1433"
-    PORTAL_RDBMS_DB: "chluat"
-    PORTAL_RDBMS_USER: "chluatusr"
+    PORTAL_RDBMS_ENGINE: "mysql"
+    PORTAL_RDBMS_HOST: "fano-common-mysql"
+    PORTAL_RDBMS_PORT: "3306"
+    PORTAL_RDBMS_DB: "netwatchuat"
+    PORTAL_RDBMS_USER: "netwatchuatusr"
     PORTAL_RDMBS_REQUIRE_ENCRYPT: "false"
     PORTAL_RDMBS_REQUIRE_SERCURE_TRANSPORT: "false"
     PORTAL_DATAPANEL_NODE_ENV: "production"
@@ -48,10 +89,10 @@ fano-datapanel-crud:
     PORTAL_RDMBS_POOL_MAX: "500"
     PORTAL_RDBMS_TIMEZONE: "Asia/Hong_Kong"
     PORTAL_RDBMS_UTC_OFFSET: "+08:00"
-    PORTAL_DATAPANEL_CLOUD_SERVER_URL: "http://fano-portal-crud:8080/portal-crud"
+    PORTAL_DATAPANEL_CLOUD_SERVER_URL: "http://fano-portal-crud:8080/fano/cloud"
     PORTAL_DATAPANEL_SYNC_DATASET_INTERVAL_MINUTES: "1"
-    PORTAL_DATAPANEL_CLOUD_SERVER_DOMAIN: "chluat.fano.ai/app/portal"
-    PORTAL_DATAPANEL_DOMAIN: "chluat.fano.ai/app/datapanel"
+    PORTAL_DATAPANEL_CLOUD_SERVER_DOMAIN: "netwatch-uat.fano.ai/app/portal"
+    PORTAL_DATAPANEL_DOMAIN: "netwatch-uat.fano.ai/app/datapanel"
     PORTAL_DATAPANEL_KEYCLOAK_DEFAULT_REALM: "fanolabs"
     PORTAL_DATAPANEL_DATASET_LIMIT_SIZE: "1000000"
     PORTAL_DATAPANEL_DATASET_EXPORT_SIZE_PER_TIME: "100000"
@@ -72,10 +113,18 @@ fano-datapanel-crud:
     PORTAL_RDBMS_PWD: "rdbms_password"
   localVolume:
     enabled: false
-    hostPath: /opt/fano/data/chl-uat/files
+    hostPath: /opt/fano/data/hkpf-netwatch-uat/files
   service:
     type: ClusterIP
     port: 8080
+  ingress:
+    enabled: false
+    annotations:
+      kubernetes.io/ingress.class: "nginx"
+    hosts:
+      - host: netwatch-uat.fano.ai
+        paths:
+        - /app/datapanel
   command:
     - '/bin/sh'
   commandArgs:
@@ -104,12 +153,12 @@ fano-datapanel-job:
       TZ: "Asia/Hong_Kong"
       RDBMS_DEFAULT_DATASOURCE_CONN_NAME: "FANODB"
       RDMBS_CONNECTION_TYPE: "sql-login"
-      RDBMS_ENGINE: "mssql"
-      RDBMS_HOST: "192.168.174.52"
-      RDBMS_PORT: "1433"
+      RDBMS_ENGINE: "mysql"
+      RDBMS_HOST: "fano-common-mysql"
+      RDBMS_PORT: "3306"
       PORTAL_RDMBS_REQUIRE_SERCURE_TRANSPORT: "false"
-      RDBMS_DB: "chluat"
-      RDBMS_USER: "chluatusr"
+      RDBMS_DB: "netwatchuat"
+      RDBMS_USER: "netwatchuatusr"
       RDMBS_POOL_MIN: "10"
       RDMBS_POOL_MAX: "500"
       RDBMS_DOMAIN: ""       #Set to support MSSQL Windows Authentication
@@ -127,24 +176,24 @@ fano-datapanel-job:
     NODE_OPTIONS: "--max-http-header-size=81920"
     MINIO_ENDPOINT: "fano-common-oss"
     MINIO_PORT: "9000"
-    MINIO_BUCKET: "chl-uat"
+    MINIO_BUCKET: "hkpf-netwatch-uat"
     PORTAL_RDBMS_DEFAULT_DATASOURCE_CONN_NAME: "FANODB"
     PORTAL_RDMBS_CONNECTION_TYPE: "sql-login"
-    PORTAL_RDBMS_ENGINE: "mssql"
-    PORTAL_RDBMS_HOST: "192.168.174.52"
-    PORTAL_RDBMS_PORT: "1433"
-    PORTAL_RDBMS_DB: "chluat"
-    PORTAL_RDBMS_USER: "chluatusr"
+    PORTAL_RDBMS_ENGINE: "mysql"
+    PORTAL_RDBMS_HOST: "fano-common-mysql"
+    PORTAL_RDBMS_PORT: "3306"
+    PORTAL_RDBMS_DB: "netwatchuat"
+    PORTAL_RDBMS_USER: "netwatchuatusr"
     PORTAL_RDMBS_REQUIRE_ENCRYPT: "false"
     PORTAL_RDMBS_REQUIRE_SERCURE_TRANSPORT: "false"
     PORTAL_DATAPANEL_NODE_ENV: "production"
     PORTAL_DATAPANEL_PORT: "8080"
     PORTAL_RDMBS_POOL_MIN: "10"
     PORTAL_RDMBS_POOL_MAX: "500"
-    PORTAL_DATAPANEL_CLOUD_SERVER_URL: "http://fano-portal-crud:8080/portal-crud"
+    PORTAL_DATAPANEL_CLOUD_SERVER_URL: "http://fano-portal-crud:8080/fano/cloud"
     PORTAL_DATAPANEL_SYNC_DATASET_INTERVAL_MINUTES: "1"
-    PORTAL_DATAPANEL_CLOUD_SERVER_DOMAIN: "chluat.fano.ai/app/portal"
-    PORTAL_DATAPANEL_DOMAIN: "chluat.fano.ai/app/datapanel"
+    PORTAL_DATAPANEL_CLOUD_SERVER_DOMAIN: "netwatch-uat.fano.ai/app/portal"
+    PORTAL_DATAPANEL_DOMAIN: "netwatch-uat.fano.ai/app/datapanel"
     PORTAL_DATAPANEL_KEYCLOAK_DEFAULT_REALM: "fanolabs"
     PORTAL_DATAPANEL_DATASET_LIMIT_SIZE: "1000000"
     PORTAL_DATAPANEL_DATASET_EXPORT_SIZE_PER_TIME: "100000"
@@ -157,7 +206,7 @@ fano-datapanel-job:
 
   localVolume:
     enabled: false
-    hostPath: /opt/fano/data/chl-uat/files
+    hostPath: /opt/fano/data/hkpf-netwatch-uat/files
 
   service:
     type: ClusterIP

@@ -421,7 +421,7 @@ primary:
     ##     app: my-app
     ##
     selector: {}
-  hostPath: /opt/fano/data/chl-uat/mysql
+  hostPath: /opt/fano/data/hkpf-netwatch-uat/mysql
   ## @param primary.extraVolumes [array] Optionally specify extra list of additional volumes to the MySQL Primary pod(s)
   ##
   extraVolumes: []

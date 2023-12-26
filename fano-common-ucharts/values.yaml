@@ -1,5 +1,4 @@
 global:
-  serviceAccount: "default"
   imageRegistry: 'hub.fano.ai'
   imagePullSecrets:
     - fano-secret-hk
@@ -8,10 +7,10 @@ global:
     # url: 'fano-common-postgresql'
     # port: 5432
     # database: 'fano-speech-ms-license-control'
-    type: 'mssql'
-    url: '192.168.174.52'
-    port: 1433
-    database: 'chluat'
+    type: 'mysql'
+    url: 'fano-common-mysql'
+    port: 3306
+    database: 'netwatchuat'
     auth:
       enabled: true
       existingSecret: 'fano-common-secret' # opaque secret key: username, password
@@ -63,11 +62,11 @@ license-client:
     runDatabaseMigration: false
     loglevel: info
     db:
-      type: 'mssql'
-      url: '192.168.174.52'
-      port: 1433
-      database: 'chluat'
-      rdbms_username: "chluatusr"
+      type: 'mysql'
+      url: 'fano-common-mysql'
+      port: 3306
+      database: 'netwatchuat'
+      rdbms_username: "netwatchuatusr"
       license_client_rdbms_domain: 
       encrypt: false
       auth:
@@ -136,7 +135,7 @@ oss:
     oss_access_key: admin
   persistence:
     enabled: true
-    existingClaim: "chl-uat"
+    existingClaim: "hkpf-netwatch-uat"
   volumePermissions:
     enabled: true
     image:
@@ -146,7 +145,7 @@ oss:
     - name: OSS_SSE_KMS_ENCRYPTION
       value: "off"
     # - name: OSS_IDENTITY_OPENID_BASE_URL
-    #   value: https://chluat.fano.ai/iam
+    #   value: https://netwatch-uat.fano.ai/iam
     - name: OSS_IDENTITY_OPENID_REALM
       value: fanolabs
     - name: OSS_IDENTITY_OPENID_CLIENT_ID
@@ -154,13 +153,13 @@ oss:
     - name: OSS_IDENTITY_OPENID_POLICY_CLAIM_PREFIX
       value: oss_
     - name: OSS_EXTERNAL_URL
-      value: chluat.fano.ai/oss
+      value: netwatch-uat.fano.ai/oss
     - name: OSS_EXTERNAL_URL_SCHEME
       value: https
     - name: OSS_SERVER_PREFIX
       value: "on"
     - name: OSS_PORTAL_URL
-      value: https://chluat.fano.ai/app/portal
+      value: https://netwatch-uat.fano.ai/app/portal
     - name: OSS_KEY_ROTATION_ENABLED
       value: "on"
     - name: OSS_COMPRESS
@@ -177,7 +176,7 @@ oss:
     enabled: false
     existingSecret: fano-common-tls
   existingSecret: 'minio-pass-secret'
-  hostPath: '/opt/fano/data/chl-uat/oss-data'
+  hostPath: '/opt/fano/data/hkpf-netwatch-uat/oss-data'
   resources:
     limits:
       cpu: 4000m
@@ -196,7 +195,7 @@ oss:
   ingress:
     enabled: true
     apiVersion: ""
-    hostname: chluat.fano.ai
+    hostname: netwatch-uat.fano.ai
     path: /oss
 ############################################################################################################################
 ##    service: fano-common-oss-gateway                                                                                    ##
@@ -215,7 +214,7 @@ oss-gateway:
     auth:
       azure:
         accessKey: "admin"
-        secretKey: "38sjSlz2ZsIiswu11"
+        secretKey: "z6Ps2kdpjZsIwu11"
         serviceEndpoint: ""
         storageAccountName: "fanoqa"
         storageAccountKey: "XpL94J47org9PHiGu49oioG0Mu19Tf6g+Y2jhjp9mM9SNfpIIdVu5g32etl8E8XfWOPxKwQb77zs+AStLIBcgw=="
@@ -227,11 +226,11 @@ oss-gateway:
         accessKeyId: "fanoqa"
         secretAccessKey: "XpL94J47org9PHiGu49oioG0Mu19Tf6g+Y2jhjp9mM9SNfpIIdVu5g32etl8E8XfWOPxKwQb77zs+AStLIBcgw=="
         accessKey: "admin"
-        secretKey: "38sjSlz2ZsIiswu11"
+        secretKey: "z6Ps2kdpjZsIwu11"
         serviceEndpoint: "https://s3.amazonaws.com"
       gcs:
         accessKey: "admin"
-        secretKey: "38sjSlz2ZsIiswu11"
+        secretKey: "z6Ps2kdpjZsIwu11"
         keyJSON: |
           {
             "type": "service_account",
@@ -251,7 +250,7 @@ oss-gateway:
   ingress:
     enabled: true
     apiVersion: ""
-    hostname: chluat.fano.ai
+    hostname: netwatch-uat.fano.ai
     path: /
     annotations:
       kubernetes.io/ingress.class: "nginx"
@@ -268,14 +267,14 @@ postgresql:
     runAsUser: 0
   persistence:
     enabled: true
-    existingClaim: "chl-uat"
+    existingClaim: "hkpf-netwatch-uat"
   volumePermissions:
     enabled: false
     image:
       repository: 'fanolabs/fano-dia-init-data'
       tag: 'v2.1.3'
   postgresqlUsername: 'postgres'
-  hostPath: '/opt/fano/data/chl-uat/postgres'
+  hostPath: '/opt/fano/data/hkpf-netwatch-uat/postgres'
   existingSecret: 'fano-common-secret'
   # nodeAffinityPreset:
   #   type: "hard"
@@ -292,17 +291,17 @@ mysql:
     pullPolicy: IfNotPresent
   auth:
     rootPassword: "Fanolabs2022"
-    database: chluat
-    username: "chluatusr"
-    password: "b5vgNwYgs7fHM"
+    database: netwatchuat
+    username: "netwatchuatusr"
+    password: "uuXeQPOfWCdxbOi9"
   initdbScripts:
     fano_init_script.sql: |
-      GRANT USAGE ON *.* TO 'chluatusr'@'%';
-      GRANT PROCESS ON *.* TO 'chluatusr'@'%';
+      GRANT USAGE ON *.* TO 'netwatchuatusr'@'%';
+      GRANT PROCESS ON *.* TO 'netwatchuatusr'@'%';
   primary:
     persistence:
       enabled: true
-      existingClaim: "chl-uat"
+      existingClaim: "hkpf-netwatch-uat"
       subPath: "mysql-data"
     resources:
       limits:
@@ -316,7 +315,7 @@ mysql:
     #   key: "portal-prod-mysql"
     #   values:
     #     - portal-prod-mysql
-    hostPath: /opt/fano/data/chl-uat/mysql
+    hostPath: /opt/fano/data/hkpf-netwatch-uat/mysql
 ############################################################################################################################
 ##    service: fano-common-nats                                                                                           ##
 ############################################################################################################################
@@ -342,10 +341,10 @@ nats:
         size: 4Gi
       fileStorage:
         enabled: false
-        existingClaim: "chl-uat"
+        existingClaim: "hkpf-netwatch-uat"
         subpath: nats-data
         size: 4Gi
-      hostPath: '/opt/fano/data/chl-uat/nats-data'
+      hostPath: '/opt/fano/data/hkpf-netwatch-uat/nats-data'
   exporter:
     enabled: false
     image:
@@ -375,14 +374,14 @@ nats:
 # Secrets
 Secret:
   enabled: true
-  oss_secretkey: 38sjSlz2ZsIiswu11
-  rdbms_password: b5vgNwYgs7fHM
-  keycloak_admin_password: MiFZhvgQgOnY222
+  oss_secretkey: z6Ps2kdpjZsIwu11
+  rdbms_password: uuXeQPOfWCdxbOi9
+  keycloak_admin_password: Mi234vgQgOnY222
   cloud_app_keycloak_client_secret: "gHlQP1dDTLWww5BtGDaO07qqEfRTZ5Jg"
 # DBSecret:
 #   enabled: false
-#   username: 'chluatusr'
-#   password: 'b5vgNwYgs7fHM'
+#   username: 'netwatchuatusr'
+#   password: 'uuXeQPOfWCdxbOi9'
 
 # PGSecret:
 #   enabled: false
@@ -392,7 +391,7 @@ Secret:
 # minioPassSecret:
 #   enabled: false
 #   accesskey: 'admin'
-#   secretkey: '38sjSlz2ZsIiswu11'
+#   secretkey: 'z6Ps2kdpjZsIwu11'
 
 # smtpSecret:
 #   enabled: false
@@ -406,9 +405,6 @@ fanoSecretHK:
   enabled: true
 
 fanoCert:
-  enabled: false
-
-createServiceAccount:
   enabled: false
 
 ############################################################################################################################
@@ -428,17 +424,17 @@ db-backup:
       env:
         MINIO_HOST: "fano-common-oss:9000"
         BUCKET_NAME: "db-backup"
-        MYSQL_HOST: "192.168.174.52"
-        MYSQL_USER: "chluatusr"
-        MYSQL_DATABASES: "chluat"
+        MYSQL_HOST: "fano-common-mysql"
+        MYSQL_USER: "netwatchuatusr"
+        MYSQL_DATABASES: "netwatchuat"
         MYSQL_IGNORE_TABLE:  "test1|test2"
         USE_MINIO: "True"
         BACKUP_MYSQL: "True"
         BACKUP_MONGODB: "false"
         MONGO_SSL: "false"
         BACKUP_POSTGRES: "false"
-        PG_HOST: "192.168.174.52"
-        PG_USER: "chluatusr"
+        PG_HOST: "fano-common-mysql"
+        PG_USER: "netwatchuatusr"
         SCHEDULER_TIME: "52 16 * * *"
         DEPLOY_MODE: "k8s"
         MINIO_HOUSEKEEPING: "True"
@@ -446,11 +442,11 @@ db-backup:
         POSTGRES_HOUSEKEEPING_DAY: "10"
         MONGODB_HOUSEKEEPING_DAY: "10"
       envSecret:
-        PG_PASS: "b5vgNwYgs7fHM"
+        PG_PASS: "uuXeQPOfWCdxbOi9"
         MONGO_URI: "mongodb://root:password@mongodb-0.mongodb-headless.lucas-testing.svc.cluster.local:27017/?tls=false&connectTimeoutMS=30000&authSource=admin&retryWrites=true&w=majority"
-        MYSQL_PASS: "b5vgNwYgs7fHM"
+        MYSQL_PASS: "uuXeQPOfWCdxbOi9"
         MINIO_ACCESS_KEY: "admin"
-        MINIO_SECRET_KEY: "38sjSlz2ZsIiswu11"
+        MINIO_SECRET_KEY: "z6Ps2kdpjZsIwu11"
       schedule: "00 01 * * *"
       command: ["/bin/sh"]
       args:
@@ -470,11 +466,11 @@ db-backup:
       volumes:
       - name: dbbackup
         hostPath:
-          path: /opt/fano/data/dbbackup/chl-uat
+          path: /opt/fano/data/dbbackup/hkpf-netwatch-uat
           type: DirectoryOrCreate
       volumeMounts:
       - name: dbbackup
-        mountPath: /opt/fano/data/dbbackup/chl-uat
+        mountPath: /opt/fano/data/dbbackup/hkpf-netwatch-uat
       tolerations:
       - effect: NoSchedule
         operator: Exists

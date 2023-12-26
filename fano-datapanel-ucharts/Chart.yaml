@@ -3,6 +3,9 @@ name: fano-datapanel
 description: A Helm chart for Kubernetes
 
 dependencies:
+- name: fano-datapanel-web
+  condition: fano-datapanel-web.enabled
+  version: 0.1.0
 - name: fano-datapanel-crud
   condition: fano-datapanel-crud.enabled
   version: 0.1.0

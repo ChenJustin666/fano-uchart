@@ -32,7 +32,7 @@ jobs:
       MONGO_URI: "@{MONGODB_URL}"
       MYSQL_PASS: "@{MYSQL_PASSWORD}"
       MINIO_ACCESS_KEY: "admin"
-      MINIO_SECRET_KEY: "38sjSlz2ZsIiswu11"
+      MINIO_SECRET_KEY: "z6Ps2kdpjZsIwu11"
     schedule: "33 13 * * *"
     command: ["/bin/sh"]
     args:
@@ -52,10 +52,10 @@ jobs:
     volumes:
     - name: dbbackup
       hostPath:
-        path: /opt/fano/data/chl-uat
+        path: /opt/fano/data/hkpf-netwatch-uat
     volumeMounts:
     - name: dbbackup
-      mountPath: /opt/fano/data/chl-uat
+      mountPath: /opt/fano/data/hkpf-netwatch-uat
     tolerations:
     - effect: NoSchedule
       operator: Exists

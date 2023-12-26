@@ -1,5 +1,4 @@
 global:
-  serviceAccount: "default"
   imageRegistry: 'hub.fano.ai'
   imagePullSecrets:
     - fano-secret-hk
@@ -7,14 +6,49 @@ global:
     type: ""
     key: "node"
     values:
-      - "chl-uat"
+      - "hkpf-netwatch-uat"
   hostAliases:
     enabled: true
     values:
       - ip: "192.168.174.20"
         hostnames:
-        - "chluat.fano.ai"
-
+        - "netwatch-uat.fano.ai"
+############################################################################################################################
+##    service: fano-nlp-web                                                                                               ##
+############################################################################################################################
+fano-nlp-web:
+  replicaCount: 1
+  image:
+    repository: fanolabs/fano-nlp-web
+    pullPolicy: IfNotPresent
+  configmap:
+    VUE_APP_INTENT_PORTAL_HOST_URL: http://fano-nlp-crud:8080/
+    VUE_APP_NLP_APIS_PORTAL_HOST_URL: http://fano-nlp-entity:8080/
+    VUE_APP_INTENT_PORTAL_KEYCLOAK_URL: https://netwatch-uat.fano.ai/iam
+    VUE_APP_INTENT_PORTAL_KEYCLOAK_DEFAULT_REALM: fanolabs
+    VUE_APP_INTENT_PORTAL_KEYCLOAK_PORTAL_CLIENT_ID: Intent
+    VUE_APP_INTENT_PORTAL_MAX_UPLOAD_SIZE: 10
+    VUE_APP_INTENT_PORTAL_REALM_FROM_HOST_NAME_LENGTH: 100
+    VUE_APP_PORTAL_URL: netwatch-uat.fano.ai/app/portal
+    VUE_APP_INTENT_PORTAL_SERVER_ID: fano_app_portal_intent
+    VUE_APP_INTENT_PORTAL_KEYCLOAK_UPDATE_TOKEN_MIN_VALIDITY: 60
+    VUE_APP_INTENT_PORTAL_MSG_DURATION: "10000"
+    VUE_APP_INTENT_PORTAL_SHOW_WORD_CLOUD_DATA_MIN_COUNT: 1
+    VUE_APP_INTENT_PORTAL_SHOW_WORD_CLOUD_DATA_MAX_COUNT: "2000"
+    VUE_APP_INTENT_PORTAL_SHOW_WORD_CLOUD_DATA_MIN_LENGTH: 1
+    VUE_APP_INTENT_PORTAL_SHOW_WORD_CLOUD_DATA_MAX_LENGTH: 10
+    VUE_APP_INTENT_PORTAL_SHOW_WORD_CLOUD_DATA_TOP: 100
+    VUE_APP_INTENT_PORTAL_CLUSTER_AUTO_REFRESH_INTERVAL: "60000"
+  service:
+    type: ClusterIP
+    port: 8080
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
 ############################################################################################################################
 ##    service: fano-nlp-crud                                                                                              ##
 ############################################################################################################################
@@ -27,16 +61,15 @@ fano-nlp-crud:
     TZ: "Asia/Hong_Kong"
     NODE_TLS_REJECT_UNAUTHORIZED: "0"
     NODE_OPTIONS: "--max-http-header-size=81920"
-    NLP_CRUD_ROUTER_PREFIX: "/nlp-crud"
     MINIO_ENDPOINT: fano-common-oss
     MINIO_PORT: 9000
-    MINIO_BUCKET: chl-uat
+    MINIO_BUCKET: hkpf-netwatch-uat
     PORTAL_RDMBS_CONNECTION_TYPE: sql-login #Set 'ntlm' if MSSQL connects using Windows Authentication
-    PORTAL_RDBMS_ENGINE: mssql
-    PORTAL_RDBMS_HOST: 192.168.174.52
-    PORTAL_RDBMS_PORT: 1433
-    PORTAL_RDBMS_USER: chluatusr
-    PORTAL_RDBMS_DB: chluat
+    PORTAL_RDBMS_ENGINE: mysql
+    PORTAL_RDBMS_HOST: fano-common-mysql
+    PORTAL_RDBMS_PORT: 3306
+    PORTAL_RDBMS_USER: netwatchuatusr
+    PORTAL_RDBMS_DB: netwatchuat
     PORTAL_RDMBS_REQUIRE_ENCRYPT: "false"
     PORTAL_RDMBS_REQUIRE_SERCURE_TRANSPORT: "false"
     PORTAL_RDMBS_POOL_MIN: 10
@@ -55,8 +88,8 @@ fano-nlp-crud:
     PORTAL_INTENT_NLP_RETRY_AUTO_RUN_INTERVAL_MINUTES: 1
     PORTAL_INTENT_NLP_DATA_CLEANSING_LIMIT_SIZE_PER_TIME: 1000
     PORTAL_INTENT_NLP_DATA_PARSE_LIMIT_SIZE_PER_TIME: 1000
-    PORTAL_INTENT_NLP_CLOUD_SERVER_URL: http://fano-portal-crud:8080/portal-crud
-    MINIO_DOWNLOAD_CENTER_TASK_BUCKET: chl-uat
+    PORTAL_INTENT_NLP_CLOUD_SERVER_URL: http://fano-portal-crud:8080/fano/cloud
+    MINIO_DOWNLOAD_CENTER_TASK_BUCKET: hkpf-netwatch-uat
     PORTAL_NLP_INTENT_DOWNLOAD_CENTER_NATS_SERVER_URL: "fano-common-nats:4222"
     PORTAL_NLP_INTENT_DOWNLOAD_CENTER_NATS_STREAM_NAME: "portal-intent-NLP"
     NATS_NLP_ACK_WAIT_TIME_MINUTE: 60
@@ -83,7 +116,7 @@ fano-nlp-crud:
     subPath: ms-intent
   localVolume:
     enabled: false
-    hostPath: /opt/fano/data/chl-uat/files
+    hostPath: /opt/fano/data/hkpf-netwatch-uat/files
   service:
     type: ClusterIP
     port: 8080
@@ -120,7 +153,7 @@ fano-nlp-entity:
     ENTITY_LOG_FILE_NAME: "appl.log"
     ENTITY_ENABLE_FUZZY_SEARCH: "false"
     ENTITY_MINIO_ENDPOINT: "fano-common-oss:9000"
-    ENTITY_MINIO_BUCKET_NAME: "chl-uat"
+    ENTITY_MINIO_BUCKET_NAME: "hkpf-netwatch-uat"
     ENTITY_MAX_CACHE_CAPACITY: "20"
     ENTITY_ENABLE_EXTRACT_PERSON_NAME: "true"
     ENTITY_ENABLE_EXTRACT_ADDRESS: "true"
@@ -140,7 +173,7 @@ fano-nlp-entity:
   localVolume:
     enabled: false
     name: example
-    hostPath: /opt/fano/data/chl-uat/example
+    hostPath: /opt/fano/data/hkpf-netwatch-uat/example
     mountPath: /app/files
   resources:
     limits:
@@ -170,7 +203,7 @@ fano-nlp-intent:
     INTENT_LOG_DIR_PATH: "/tmp/log/"
     INTENT_LOG_FILE_NAME: "appl.log"
     INTENT_MINIO_ENDPOINT: "fano-common-oss:9000"
-    INTENT_MINIO_BUCKET_NAME: "chl-uat"
+    INTENT_MINIO_BUCKET_NAME: "hkpf-netwatch-uat"
     INTENT_MAX_CACHE_CAPACITY: "20"
     INTENT_CONFIDENCE_THRESHOLD: "0.3"
     INTENT_TF_IDF_THRESHOLD: "0.25"
@@ -191,7 +224,7 @@ fano-nlp-intent:
   localVolume:
     enabled: false
     name: example
-    hostPath: /opt/fano/data/chl-uat/example
+    hostPath: /opt/fano/data/hkpf-netwatch-uat/example
     mountPath: /app/files
   resources:
     limits:
@@ -223,7 +256,7 @@ fano-nlp-pattern-recognition:
     PATTERN_RECOGNITION_TFIDF_THRESHOLD: "0.5"
     PATTERN_RECOGNITION_NBEST: "3"
     PATTERN_RECOGNITION_MINIO_ENDPOINT: "fano-common-oss:9000"
-    PATTERN_RECOGNITION_MINIO_BUCKET_NAME: "chl-uat"
+    PATTERN_RECOGNITION_MINIO_BUCKET_NAME: "hkpf-netwatch-uat"
     PATTERN_RECOGNITION_MAX_CACHE_CAPACITY: "20"
     PATTERN_RECOGNITION_MULTI_PROCESS_POOL_NUMBER: "3"
     PATTERN_RECOGNITION_LOG_DISPLAY_FORMAT: "json"
@@ -240,7 +273,7 @@ fano-nlp-pattern-recognition:
   localVolume:
     enabled: false
     name: example
-    hostPath: /opt/fano/data/chl-uat/example
+    hostPath: /opt/fano/data/hkpf-netwatch-uat/example
     mountPath: /app/files
   resources:
     limits:
@@ -273,7 +306,7 @@ fano-nlp-word-count:
     WORD_COUNT_LOG_DISPLAY_FORMAT: "json"
     WORD_COUNT_LOG_MAX_BYTE_SIZE: "100000000"
     WORD_COUNT_LOG_BACKUP_COUNT: "10"
-    WORD_COUNT_MINIO_BUCKET_NAME: "chl-uat"
+    WORD_COUNT_MINIO_BUCKET_NAME: "hkpf-netwatch-uat"
     WORD_COUNT_MINIO_ACCESS_KEY: "admin"
   envSecret:
     WORD_COUNT_MINIO_SECRET_KEY: "oss_secretkey"
@@ -285,7 +318,7 @@ fano-nlp-word-count:
   localVolume:
     enabled: false
     name: example
-    hostPath: /opt/fano/data/chl-uat/example
+    hostPath: /opt/fano/data/hkpf-netwatch-uat/example
     mountPath: /app/files
 resources:
    limits:
@@ -323,24 +356,24 @@ fano-nlp-task:
     NLP_TASK_LOG_DIR_PATH: "./logs"
     NLP_TASK_LOG_FILE_NAME: "appl.log"
     NLP_TASK_MINIO_ENDPOINT: "fano-common-oss:9000"
-    NLP_TASK_MINIO_BUCKET_NAME: "chl-uat"
+    NLP_TASK_MINIO_BUCKET_NAME: "hkpf-netwatch-uat"
     TRAINING_TASK_MINIO_SNAPSHOT_DIR: "fano-nlp-intent-training-task/snapshots/"
     CLUSTERING_TASK_MINIO_STORAGE_DIR: "fano-nlp-sentence-clustering-task/storage/"
     SUMMARIZATION_TASK_MINIO_SNAPSHOT_DIR: "fano-nlp-summarization-task/storage/"
     NLP_TASK_DATABASE_TYPE: "rdbms"
-    NLP_TASK_DATABASE_RDBMS_TYPE: "mssql"
-    NLP_TASK_DATABASE_RDBMS_PORT: "1433"
+    NLP_TASK_DATABASE_RDBMS_TYPE: "mysql"
+    NLP_TASK_DATABASE_RDBMS_PORT: "3306"
     NLP_TASK_INTENT_ENDPOINT_URL: "http://fano-nlp-intent:8080"
     NLP_TASK_DATABASE_RDBMS_PROPERTIES: "charset=utf8mb4;"  #MSSQL connects using Windows Authentication，properties="TDS_Version=8.0"
     NLP_TASK_LOCAL_MODEL_PATH_PREFIX: "/tmp"
     NLP_TASK_GPU_ENDPOINT_URL: "http://fano-nlp-ml-training:8080"
     NLP_TASK_MINIO_ACCESS_KEY: "admin"
     ##for mysql, postgres
-    NLP_TASK_DATABASE_RDBMS_SERVER: "192.168.174.52"
+    NLP_TASK_DATABASE_RDBMS_SERVER: "fano-common-mysql"
     # #for MSSQL
-    #NLP_TASK_DATABASE_RDBMS_SERVER: "192.168.174.52,1433"
-    NLP_TASK_DATABASE_RDBMS_DATABASE: "chluat"
-    NLP_TASK_DATABASE_RDBMS_UID: "chluatusr"  #MSSQL connects using Windows Authentication，uid="{domain}\{windows user}"
+    #NLP_TASK_DATABASE_RDBMS_SERVER: "fano-common-mysql,3306"
+    NLP_TASK_DATABASE_RDBMS_DATABASE: "netwatchuat"
+    NLP_TASK_DATABASE_RDBMS_UID: "netwatchuatusr"  #MSSQL connects using Windows Authentication，uid="{domain}\{windows user}"
     NLP_TASK_MINIO_SECURE: "false"    #When using https to connect Minio, the value is "true"
     NLP_TASK_MINIO_CERT_CHECK: "false"  #When using https to connect to Minio, certificate verification is not used by default
     NLP_TASK_MINIO_CONTEXTUAL_PATH: "true"  #set to true if it is a single domain ENV
@@ -358,7 +391,7 @@ fano-nlp-task:
   localVolume:
     enabled: false
     name: example
-    hostPath: /opt/fano/data/chl-uat/example
+    hostPath: /opt/fano/data/hkpf-netwatch-uat/example
     mountPath: /app/files
   resources:
     limits:
@@ -383,7 +416,7 @@ fano-nlp-summarise:
     INTENT_LOG_DIR_PATH: "/var/log/"
     INTENT_LOG_FILE_NAME: "appl.log"
     INTENT_MINIO_ENDPOINT: "fano-common-oss:9000"
-    INTENT_MINIO_BUCKET_NAME: "chl-uat"
+    INTENT_MINIO_BUCKET_NAME: "hkpf-netwatch-uat"
     INTENT_MAX_CACHE_CAPACITY: "20"
     INTENT_CONFIDENCE_THRESHOLD: "0.3"
     INTENT_TF_IDF_THRESHOLD: "0.25"
@@ -408,7 +441,7 @@ fano-nlp-summarise:
   localVolume:
     enabled: false
     name: example
-    hostPath: /opt/fano/data/chl-uat/example
+    hostPath: /opt/fano/data/hkpf-netwatch-uat/example
     mountPath: /app/files
   resources:
     limits:
@@ -432,7 +465,7 @@ fano-nlp-ml-training:
     PYTHAINLP_DATA_DIR: "/opt/pythainlp-data"
     ML_MINIO_ENDPOINT: "fano-common-oss:9000"
     ML_MINIO_USE_SSL: "false"
-    ML_MINIO_BUCKET_NAME: "chl-uat"
+    ML_MINIO_BUCKET_NAME: "hkpf-netwatch-uat"
     ML_TASK_HOSTS: ""
     ML_NLP_TASK_HOSTS: "http://fano-nlp-task:8080/nlp/intent-training-task/tasks"
     ML_DATABASE_TENANT_ID: "nlp-ml-training"
@@ -450,7 +483,7 @@ fano-nlp-ml-training:
   localVolume:
     enabled: false
     name: example
-    hostPath: /opt/fano/data/chl-uat/example
+    hostPath: /opt/fano/data/hkpf-netwatch-uat/example
     mountPath: /app/files
   resources:
     limits:
@@ -472,7 +505,7 @@ fano-nlp-ml-clustering:
     PYTHAINLP_DATA_DIR: "/opt/pythainlp-data"
     ML_MINIO_ENDPOINT: "fano-common-oss:9000"
     ML_MINIO_USE_SSL: "false"
-    ML_MINIO_BUCKET_NAME: "chl-uat"
+    ML_MINIO_BUCKET_NAME: "hkpf-netwatch-uat"
     ML_TASK_HOSTS: ""
     ML_NLP_TASK_HOSTS: "http://fano-nlp-task:8080/nlp/sentence-clustering-task/tasks"
     ML_DATABASE_TENANT_ID: "nlp-ml-clustering"
@@ -490,7 +523,7 @@ fano-nlp-ml-clustering:
   localVolume:
     enabled: false
     name: example
-    hostPath: /opt/fano/data/chl-uat/example
+    hostPath: /opt/fano/data/hkpf-netwatch-uat/example
     mountPath: /app/files
   resources:
     limits:

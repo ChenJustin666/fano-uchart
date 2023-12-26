@@ -24,7 +24,6 @@ spec:
       labels:
         {{- include "fanolabs.selectorLabels" . | nindent 8 }}
     spec:
-      serviceAccountName: {{ include "fanolabs.serviceAccountName" . }}
       {{- if .Values.global.hostAliases.enabled }}
       hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.global.hostAliases.values "context" $) | nindent 8 }}
       {{- end }}

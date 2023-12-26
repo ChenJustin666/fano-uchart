@@ -57,7 +57,7 @@ ingress:
     nginx.ingress.kubernetes.io/auth-snippet: |
       proxy_set_header Host $host;
   hosts:
-    - host: chluat.fano.ai
+    - host: netwatch-uat.fano.ai
       paths:
       - /app/callinter
 

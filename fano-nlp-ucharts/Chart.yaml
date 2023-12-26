@@ -16,6 +16,9 @@ dependencies:
 - name: fano-nlp-word-count
   condition: fano-nlp-word-count.enabled
   version: 0.1.0
+- name: fano-nlp-web
+  condition: fano-nlp-web.enabled
+  version: 0.1.0
 - name: fano-nlp-crud
   condition: fano-nlp-crud.enabled
   version: 0.1.0

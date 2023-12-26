@@ -30,9 +30,6 @@ dependencies:
 - name: fano-callinter-convert-worker
   condition: fano-callinter-convert-worker.enabled
   version: 0.1.0 
-- name: fano-callinter-migration
-  condition: fano-callinter-migration.enabled
-  version: 0.1.0 
   
 # - name: fano-voiceprint
 #   condition: fano-voiceprint.enabled

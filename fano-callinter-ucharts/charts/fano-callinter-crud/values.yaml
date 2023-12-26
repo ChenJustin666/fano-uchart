@@ -61,7 +61,7 @@ ingress:
     nginx.ingress.kubernetes.io/ssl-passthrough: "false"
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
   hosts:
-    - host: chluat.fano.ai
+    - host: netwatch-uat.fano.ai
       paths:
       - /callinter-crud
 
